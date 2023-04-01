@@ -56,7 +56,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         //delete room
         Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoom'])->name('DeleteRoom');
         // //route admin/rooms/store
-        // Route::post('/store', [AdminRoomController::class, 'storeRoom'])->name('StoreRoom');
+        Route::post('/edit', [AdminRoomController::class, 'editRoom'])->name('editRoom');
         // //route admin/rooms/edit/{id}
         // Route::get('/edit/{id}', [AdminRoomController::class, 'editRoom'])->name('EditRoom');
         // //route admin/rooms/update/{id}

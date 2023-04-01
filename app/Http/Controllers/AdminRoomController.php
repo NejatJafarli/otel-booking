@@ -78,4 +78,42 @@ class AdminRoomController extends Controller
             "message" => "Oda başarıyla silindi!"
         ], 200);
     }
+
+    //editRoom
+    public function editRoom(Request $req)
+    {
+        //validate request data
+        $req->validate(
+            [
+                "room_number" => "required | numeric | min:1",
+                "room_type" => "required | numeric | min:1",
+                "room_price" => "required | numeric | min:1",
+            ],
+            [
+                "room_number.required" => "Oda numarası boş bırakılamaz!",
+                "room_number.numeric" => "Oda numarası sayısal olmalıdır!",
+                "room_number.min" => "Oda numarası 1'den küçük olamaz!",
+                "room_type.required" => "Oda Turu boş bırakılamaz!",
+                "room_type.numeric" => "Oda Turu sayısal olmalıdır!",
+                "room_type.min" => "Oda Turu seçiniz!",
+                "room_price.required" => "Oda fiyatı boş bırakılamaz!",
+                "room_price.numeric" => "Oda fiyatı sayısal olmalıdır!",
+                "room_price.min" => "Oda fiyatı 1'den küçük olamaz!",
+            ]
+        );
+        //find room
+        $room = room::find($req->room_id);
+        //update room
+        $room->update([
+            "room_number" => $req->room_number,
+            "room_type_id" => $req->room_type,
+            "room_price" => $req->room_price,
+        ]);
+
+        //return json response
+        return response()->json([
+            "status" => true,
+            "message" => "Oda başarıyla güncellendi!"
+        ], 200);
+    }
 }

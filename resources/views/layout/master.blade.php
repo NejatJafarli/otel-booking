@@ -65,26 +65,26 @@ License: For each use you must have a valid license purchased only from above li
                 <ul class="nav">
                     <li class="nav-item nav-category">Main</li>
                     <li class="nav-item">
-                        <a href="{{route("adminDashboard")}}" class="nav-link">
+                        <a href="{{ route('adminDashboard') }}" class="nav-link">
                             <i class="link-icon" data-feather="box"></i>
                             <span class="link-title">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{route("rooms")}}" class="nav-link">
+                        <a href="{{ route('rooms') }}" class="nav-link">
                             <i class="link-icon" data-feather="home"></i>
                             <span class="link-title">Odalar</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a href="{{route("users")}}" class="nav-link">
+                        <a href="{{ route('users') }}" class="nav-link">
                             <i class="link-icon" data-feather="users"></i>
                             <span class="link-title">Kullanicilar</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{route("trans")}}" class="nav-link">
+                        <a href="{{ route('trans') }}" class="nav-link">
                             <i class="link-icon" data-feather="tablet"></i>
                             <span class="link-title">Transactions</span>
                         </a>
@@ -115,9 +115,9 @@ License: For each use you must have a valid license purchased only from above li
                     </form>
                     <ul class="navbar-nav" style=" width: 100px;">
                         <li class="nav-item">
-                            <a href="{{route("adminLogout")}}" class="text-body ms-0"> <svg xmlns="http://www.w3.org/2000/svg"
-                                    width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            <a href="{{ route('adminLogout') }}" class="text-body ms-0"> <svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" class="feather feather-log-out me-2 icon-md">
                                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                     <polyline points="16 17 21 12 16 7"></polyline>
@@ -148,7 +148,9 @@ License: For each use you must have a valid license purchased only from above li
     <!-- core:js -->
     <script src="../assets/vendors/core/core.js"></script>
     <!-- endinject -->
-
+    
+    {{-- jquery --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <!-- Plugin js for this page -->
     <!-- End plugin js for this page -->
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>

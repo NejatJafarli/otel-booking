@@ -195,10 +195,15 @@
                                                 <td></td>
                                             @endif
                                             <td class="text-right">
-                                                <button type="button" class="btn btn-xs btn-primary btn-icon">
+                                                <button
+                                                    onclick="editRoom(
+                                                    { id:{{ $room->id }},room_number:{{ $room->room_number }},room_type:{{ $room->room_type->id }},room_price:{{ $room->room_price }} })"
+                                                    type="button" class="btn btn-xs btn-primary btn-icon"
+                                                    data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                     <i class="link-icon" data-feather="edit"></i>
                                                 </button>
-                                                <button onclick="Test({{ $room->id }})" type="button"
+
+                                                <button onclick="deleteRoom({{ $room->id }})" type="button"
                                                     class="btn btn-xs btn-danger btn-icon">
                                                     <i class="link-icon" data-feather="trash-2"></i>
                                                 </button>
@@ -217,53 +222,172 @@
             </div>
         </div>
 
-        <script>
-            function deleteRoom(id) {
-                //swal ile silme onayi
-                swal.fire({
-                    title: 'Emin misiniz?',
-                    text: "Bu islem geri alinamaz!",
-                    icon: 'warning',
-                    //change content color
-                    customClass: {
-                        content: 'text-dark'
-                    },
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Evet, sil!',
-                    cancelButtonText: 'Hayir, iptal et!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        //ajax ile silme islemi
-                        let url = "{{ route('DeleteRoom', -1) }}";
-                        $.ajax({
-                            type: "GET",
-                            url: url.replace('-1', id),
-                            success: function(response) {
-                                console.log(response);
-                                if (response.status) {
-                                    Swal.fire(
-                                        'Silindi!',
-                                        'Oda basariyla silindi.',
-                                        'success'
-                                    ).then((result) => {
-                                        if (result.isConfirmed) {
-                                            location.reload();
-                                        }
-                                    })
-                                } else {
-                                    Swal.fire(
-                                        'Hata!',
-                                        'Oda silinemedi.',
-                                        'error'
-                                    )
-                                }
-                            }
-                        });
-                    }
-                })
+        {{-- edit modal --}}
+        <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Oda Ekle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    {{-- action="{{ route('CreateRoom') }}" method="POST" --}}
+                    <form>
+                        <input type="hidden" id="edit_id">
+                        <div class="modal-body">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="room_number" class="form-label">Oda Numarasi</label>
+                                <input type="text" class="form-control" id="edit_room_number">
+                            </div>
+                            <div class="mb-3">
+                                <label for="room_type" class="form-label">Oda Turu</label>
+                                <select class="form-select" aria-label="Default select example" id="edit_room_type">
+                                    @foreach ($types as $type)
+                                        <option value="{{ $type->id }}"
+                                            @if ($selected == $type->id) selected @endif>
+                                            {{ $type->room_type }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="room_price" class="form-label">Oda Fiyati</label>
+                                <input type="text" class="form-control" id="edit_room_price">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button onclick="ConfirmEdit()" type="button" class="btn btn-primary">Kaydet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            }
-        </script>
-    @endsection
+    <script>
+        function deleteRoom(id) {
+            //swal ile silme onayi
+            swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu islem geri alinamaz!",
+                icon: 'warning',
+                //change content color
+                customClass: {
+                    content: 'text-dark'
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'Hayir, iptal et!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //ajax ile silme islemi
+                    let url = "{{ route('DeleteRoom', -1) }}";
+                    $.ajax({
+                        type: "GET",
+                        url: url.replace('-1', id),
+                        success: function(response) {
+                            console.log(response);
+                            if (response.status) {
+                                Swal.fire(
+                                    'Silindi!',
+                                    'Oda basariyla silindi.',
+                                    'success'
+                                ).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Hata!',
+                                    'Oda silinemedi.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+
+        }
+
+        function editRoom(json) {
+            //get element by id edit_id
+            let id = document.getElementById('edit_id');
+            //set value
+            id.value = json.id;
+            //get element by id edit_room_number
+            let room_number = document.getElementById('edit_room_number');
+            //set value
+            room_number.value = json.room_number;
+            //get element by id edit_room_type
+            let room_type = document.getElementById('edit_room_type');
+            //set value
+            room_type.value = json.room_type;
+            //get element by id edit_room_price
+            let room_price = document.getElementById('edit_room_price');
+            //set value
+            room_price.value = json.room_price;
+        }
+
+        function ConfirmEdit() {
+            //swal ile silme onayi
+            swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu islem geri alinamaz!",
+                icon: 'warning',
+                //change content color
+                customClass: {
+                    content: 'text-dark'
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, degistir!',
+                cancelButtonText: 'Hayir, iptal et!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //ajax ile silme islemi
+                    let data = {
+                        _token: "{{ csrf_token() }}",
+                        room_id: $('#edit_id').val(),
+                        room_number: $('#edit_room_number').val(),
+                        room_type: $('#edit_room_type').val(),
+                        room_price: $('#edit_room_price').val(),
+                    }
+                    console.log(data);
+                    $.ajax({
+                        type: "POST",
+                        data: data,
+                        url: "{{ route('editRoom') }}",
+                        success: function(response) {
+                            console.log(response);
+                            if (response.status) {
+                                Swal.fire(
+                                    'Degistirildi!',
+                                    'Oda basariyla degistirildi.',
+                                    'success'
+                                ).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Hata!',
+                                    'Oda degistirilemedi.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+
+        }
+    </script>
+@endsection
