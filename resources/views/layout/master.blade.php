@@ -151,7 +151,7 @@ License: For each use you must have a valid license purchased only from above li
 
     <!-- Plugin js for this page -->
     <!-- End plugin js for this page -->
-
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- inject:js -->
     <script src="../assets/vendors/feather-icons/feather.min.js"></script>
     <script src="../assets/js/template.js"></script>

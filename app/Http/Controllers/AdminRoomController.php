@@ -63,4 +63,19 @@ class AdminRoomController extends Controller
 
         return redirect()->back()->with('success', 'Oda başarıyla oluşturuldu!');
     }
+
+    // deleteRoom
+    public function deleteRoom($id)
+    {
+        //find room
+        $room = room::find($id);
+        //delete room
+        $room->delete();
+
+        //return json response
+        return response()->json([
+            "status" => true,
+            "message" => "Oda başarıyla silindi!"
+        ], 200);
+    }
 }

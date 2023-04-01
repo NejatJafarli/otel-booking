@@ -194,43 +194,17 @@
                                                 <td></td>
                                                 <td></td>
                                             @endif
-
-
-                                            {{-- <td>{{ $room->created_at }}</td> --}}
+                                            <td class="text-right">
+                                                <button type="button" class="btn btn-xs btn-primary btn-icon">
+                                                    <i class="link-icon" data-feather="edit"></i>
+                                                </button>
+                                                <button onclick="Test({{ $room->id }})" type="button"
+                                                    class="btn btn-xs btn-danger btn-icon">
+                                                    <i class="link-icon" data-feather="trash-2"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
-                                    {{-- <tr>
-                                        <td>1</td>
-                                        <td>Kaan Pargan</td>
-                                        <td>kaanpargan@gmail.com</td>
-                                        <td>+905338436662</td>
-                                        <td>2022-11-09 22:06:39</td>
-                                        <td class="text-right">
-                                            <button type="button" class="btn btn-xs btn-primary btn-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="feather feather-check-square">
-                                                    <polyline points="9 11 12 14 22 4"></polyline>
-                                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-danger btn-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="feather feather-x-square">
-                                                    <rect x="3" y="3" width="18" height="18"
-                                                        rx="2" ry="2"></rect>
-                                                    <line x1="9" y1="9" x2="15" y2="15">
-                                                    </line>
-                                                    <line x1="15" y1="9" x2="9" y2="15">
-                                                    </line>
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr> --}}
                                 </tbody>
                             </table>
 
@@ -242,4 +216,54 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function deleteRoom(id) {
+                //swal ile silme onayi
+                swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu islem geri alinamaz!",
+                    icon: 'warning',
+                    //change content color
+                    customClass: {
+                        content: 'text-dark'
+                    },
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, sil!',
+                    cancelButtonText: 'Hayir, iptal et!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        //ajax ile silme islemi
+                        let url = "{{ route('DeleteRoom', -1) }}";
+                        $.ajax({
+                            type: "GET",
+                            url: url.replace('-1', id),
+                            success: function(response) {
+                                console.log(response);
+                                if (response.status) {
+                                    Swal.fire(
+                                        'Silindi!',
+                                        'Oda basariyla silindi.',
+                                        'success'
+                                    ).then((result) => {
+                                        if (result.isConfirmed) {
+                                            location.reload();
+                                        }
+                                    })
+                                } else {
+                                    Swal.fire(
+                                        'Hata!',
+                                        'Oda silinemedi.',
+                                        'error'
+                                    )
+                                }
+                            }
+                        });
+                    }
+                })
+
+            }
+        </script>
     @endsection
