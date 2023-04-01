@@ -1,0 +1,50 @@
+{
+  "data":[
+    {
+      "pagetitle": "Genel Sorular",
+      "datas": [
+        {
+          "key": "Scooter kullanım yaşı kaç?",
+          "value": "+18 yaşından büyük olmanız gerekmektedir."
+        },
+        {
+          "key": "Nasıl kiralayabilirim?",
+          "value": "Uygulamayı indirdikten sonra, kullanıcı profilinizi oluşturmanız gerekmekte. \nArdından kartınız ile cüzdanınıza kullanılabilir bakiye ekleyip, size en yakın ve \nmüsait olan scooter’un üzerindeki QR kodu okutup sürüşe başlayabilirsiniz."
+        },
+        {
+          "key": "Ödeme yönetimi güvenilir mi?",
+          "value": "Evet. 3D secure doğrulama sistemi vardır."
+        },
+        {
+          "key": "Uyulması gereken kurallar nelerdir?",
+          "value": "Öncelikle KASK ve DİRSEKLİK kullanmalısınız. Trafik kurallarına uymanız gerekir. \nÇevreyi rahatsız edecek şekilde park etmemelisiniz. Toplu taşıma araçlarına \nscooter ile binmemelisiniz."
+        },
+        {
+          "key": "Size nasıl ulaşabilirim?",
+          "value": "Uygulama içerisinden bize ulaşabilirsiniz."
+        }
+      ]
+    },
+    {
+      "pagetitle": "Sürüş Soruları",
+      "datas": [
+        {
+          "key": "Scooter ile istediğim her yere gidebilir miyim?",
+          "value": "Hayır. Çizilmiş alanların dışına çıkamazsınız."
+        },
+        {
+          "key": "Scooter’u nerelere park edebilirim?",
+          "value": "Harita üzerindeki şarj istasyonlarına park edebilirsiniz. İstasyonlara uzak iseniz; \nTrafik ve yaya yollarına, kaldırımlara, engelli yollarına, otobüs duraklarının \nönlerine ve mağaza girişlerini vs. engellemeyen, çevreyi ve insanları rahatsız \netmeyecek, park etmenin güvenli olduğu alanlara park edebilirsin."
+        },
+        {
+          "key": "Scooter’un şarjı biterse ne olur?",
+          "value": "Şarjı biten Scooter’un gaz fonksiyonu çalışmaz ve sürüşün otomatik olarak \nbitirilir. Kurallara uygun bir şekilde park ettikten sonra sürüşünü \nuygulama üzerinden sonlandırmalısın."
+        },
+        {
+          "key": "Yolculuğumu nasıl sonlandırırım?",
+          "value": "Scooterı güvenli bir yere kilitle ve mobil uygulamamız üzerinden bitir tuşuna basıp\nyolculuğunu sonlandır. Kurallara uygun bir şekilde park ettiğinizden emin olun."
+        }
+      ]
+    }
+  ]
+}

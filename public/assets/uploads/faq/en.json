@@ -1,0 +1,50 @@
+{
+  "data": [
+    {
+      "pagetitle": "General Questions",
+      "datas": [
+        {
+          "key": "What is the minimum age to use a scooter?",
+          "value": "You must be over 18 years old."
+        },
+        {
+          "key": "How can I rent a scooter?",
+          "value": "After downloading the app, you need to create your user profile. Then, add available balance to your wallet with your card and start driving by scanning the QR code on the nearest and available scooter."
+        },
+        {
+          "key": "Is payment management secure?",
+          "value": "Yes, there is a 3D secure verification system."
+        },
+        {
+          "key": "What rules do I need to follow?",
+          "value": "Firstly, you must use a HELMET and ELBOW PADS. You must also follow traffic rules. Do not park in a way that disturbs the environment. Do not take the scooter on public transport."
+        },
+        {
+          "key": "How can I reach you?",
+          "value": "You can reach us through the app."
+        }
+      ]
+    },
+    {
+      "pagetitle": "Driving Questions",
+      "datas": [
+        {
+          "key": "Can I go anywhere I want with a scooter?",
+          "value": "No, you cannot go outside the drawn areas."
+        },
+        {
+          "key": "Where can I park the scooter?",
+          "value": "You can park at charging stations on the map. If you are far from the stations; you can park in areas where it is safe to park and does not obstruct traffic and pedestrian ways, entrances of stores, etc., as long as it does not disturb the environment and people."
+        },
+        {
+          "key": "What happens if the scooter's battery runs out?",
+          "value": "The gas function of the scooter with a run-out battery does not work and the ride is automatically ended. After parking according to the rules, you must end the ride on the app."
+        },
+        {
+          "key": "How do I end my trip?",
+          "value": "Lock the scooter in a safe place and press the end trip button on our mobile app to end your trip. Make sure you have parked according to the rules."
+        }
+      ]
+    }
+  ]
+}
