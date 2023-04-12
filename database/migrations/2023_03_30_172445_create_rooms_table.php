@@ -18,9 +18,9 @@ class CreateRoomsTable extends Migration
             //room number, room type, room price, room status
             $table->string('room_number')->unique();
             $table->unsignedBigInteger('room_type_id');
-            $table->string('room_price');
             $table->string('room_status')->default("0");//0=available, 1=occupied, 2=reserved
             $table->foreign('room_type_id')->references('id')->on('room_types');
+            $table->string('room_price');
 
             //if he accepts the reservation, the room status will be changed to 1 
             $table->string("transaction_id")->nullable();

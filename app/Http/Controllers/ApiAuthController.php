@@ -12,39 +12,56 @@ class ApiAuthController extends Controller
     //
 
     //login
-    public function register(Request $request)
+    public function login(Request $request)
     {
         //validate username and password wallet id and email
         $request->validate(
             [
-                'username' => 'required|string|max:255|unique:users',
-                'password' => 'required|string|min:8',
                 'wallet_id' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
             ],
             [
-                'username.required' => 'Kullanıcı adı alanı boş bırakılamaz!',
-                'password.required' => 'Şifre alanı boş bırakılamaz!',
                 'wallet_id.required' => 'Cüzdan ID alanı boş bırakılamaz!',
-                'email.required' => 'Email alanı boş bırakılamaz!',
-                'email.unique' => 'Bu email adresi zaten kayıtlı!',
-                'password.min' => 'Şifre en az 8 karakter olmalıdır!',
-                'username.unique' => 'Bu kullanıcı adı zaten kayıtlı!',
             ]
         );
 
-        //create user
-        $user = User::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'wallet_id' => $request->wallet_id,
-            'email' => $request->email,
-        ]);
+        //check if user exists
+        $user = User::where('wallet_id', $request->wallet_id)->first();
 
-        return response()->json([
-            "status" => true,
-            'message' => 'Kayıt başarılı!',
-            'user' => $user
-        ], 201);
+        if($user){
+            return response()->json([
+                'status' => 'error',
+                "user" => $user,
+                'message' => 'Kullanıcı bulundu!'
+            ]);
+        }
+        else{
+            //request validate username and character_number
+            $request->validate(
+                [
+                    'username' => 'required|string|max:255|unique:users',
+                    'character_number' => 'required|integer',
+                ],
+                [
+                    'username.required' => 'Kullanıcı adı alanı boş bırakılamaz!',
+                    'character_number.required' => 'Karakter ID alanı boş bırakılamaz!',
+                    'username.unique' => 'Bu kullanıcı adı daha önce alınmış!',
+                    "character_number.integer" => "Karakter ID sadece sayılardan oluşabilir!"
+                ]
+            );
+
+            //create user
+            $user = User::create([
+                'username' => $request->username,
+                'wallet_id' => $request->wallet_id,
+                'character_number' => $request->character_id,
+            ]);
+
+            //return user
+            return response()->json([
+                'status' => 'success',
+                "user" => $user,
+                'message' => 'Kullanıcı oluşturuldu!'
+            ]);
+        }
     }
 }

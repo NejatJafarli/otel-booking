@@ -24,10 +24,11 @@ class CreateTransactionsTable extends Migration
             //transaction_id\
             $table->string('transaction_id');
             
-            $table->string('transaction_payment_method'); //0=paypal, 1=credit card
-            $table->string('transaction_booking_status');// 0 =pending, 1=accepted, 2=declined
-            $table->string('transaction_status'); //0=success, 1=failed
+            $table->string('transaction_status')->nullable(); //0=success, 1=failed
             $table->string('transaction_amount');
+
+
+
             $table->foreign('room_id')->references('id')->on('rooms');
             $table->timestamps();
         });

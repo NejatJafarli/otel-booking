@@ -16,12 +16,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//user login post
-Route::post('user/register', [ApiAuthController::class, 'register']);
-//user/get/id
-Route::get('user/get/{id}', [ApiMainController::class, 'getUser']);
+Route::group(['prefix' => 'api'], function () {
 
+    //user login post
+    Route::post('user/login', [ApiAuthController::class, 'login']);
+    //user/get/id
+    Route::get('user/get/{id}', [ApiMainController::class, 'getUser']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    //user rooms
+    Route::get('user/rooms/{id}', [ApiMainController::class, 'getUserRooms']);
+    //get room Types
+    Route::get('api/room_types', [ApiMainController::class, 'getRoomTypes']);
+
+    // buy a room
+    Route::post('user/buyRoomRequest', [ApiMainController::class, 'buyRoomRequest']);
 });
+
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
