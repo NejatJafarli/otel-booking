@@ -127,11 +127,6 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-                                                    <div class="mb-3">
-                                                        <label for="room_price" class="form-label">Oda Fiyati</label>
-                                                        <input type="text" class="form-control" id="room_price"
-                                                            name="room_price" value="{{ old('room_price') }}">
-                                                    </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
@@ -165,7 +160,7 @@
                                             <td>{{ $room->id }}</td>
                                             <td>{{ $room->room_number }}</td>
                                             <td>{{ $room->room_type->room_type }}</td>
-                                            <td>{{ $room->room_price }}</td>
+                                            <td>{{ $room->room_type->room_price }}</td>
 
                                             @if ($room->room_status == 1)
                                                 <td><span class="badge bg-warning">Dolu</span></td>
@@ -197,7 +192,7 @@
                                             <td class="text-right">
                                                 <button
                                                     onclick="editRoom(
-                                                    { id:{{ $room->id }},room_number:{{ $room->room_number }},room_type:{{ $room->room_type->id }},room_price:{{ $room->room_price }} })"
+                                                    { id:{{ $room->id }},room_number:{{ $room->room_number }},room_type:{{ $room->room_type->id }})"
                                                     type="button" class="btn btn-xs btn-primary btn-icon"
                                                     data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                     <i class="link-icon" data-feather="edit"></i>
@@ -250,10 +245,6 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="room_price" class="form-label">Oda Fiyati</label>
-                                <input type="text" class="form-control" id="edit_room_price">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -328,10 +319,6 @@
             let room_type = document.getElementById('edit_room_type');
             //set value
             room_type.value = json.room_type;
-            //get element by id edit_room_price
-            let room_price = document.getElementById('edit_room_price');
-            //set value
-            room_price.value = json.room_price;
         }
 
         function ConfirmEdit() {
@@ -357,7 +344,6 @@
                         room_id: $('#edit_id').val(),
                         room_number: $('#edit_room_number').val(),
                         room_type: $('#edit_room_type').val(),
-                        room_price: $('#edit_room_price').val(),
                     }
                     console.log(data);
                     $.ajax({

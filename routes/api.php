@@ -26,10 +26,15 @@ Route::group(['prefix' => 'api'], function () {
     //user rooms
     Route::get('user/rooms/{id}', [ApiMainController::class, 'getUserRooms']);
     //get room Types
-    Route::get('api/room_types', [ApiMainController::class, 'getRoomTypes']);
+    Route::get('/room_types', [ApiMainController::class, 'getRoomTypes']);
+
+    //get buy options
+    Route::get('/buy_options', [ApiMainController::class, 'getBuyOptions']);
 
     // buy a room
     Route::post('user/buyRoomRequest', [ApiMainController::class, 'buyRoomRequest']);
+
+    Route::post('user/buyRoomConfirm', [ApiMainController::class, 'buyRoomConfirm']);
 });
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

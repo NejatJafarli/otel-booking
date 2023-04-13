@@ -25,7 +25,7 @@ class CreateTransactionsTable extends Migration
             $table->string('transaction_id');
             
             $table->string('transaction_status')->nullable(); //0=success, 1=failed
-            $table->string('transaction_amount');
+            $table->string('transaction_amount')->nullable();
 
 
 

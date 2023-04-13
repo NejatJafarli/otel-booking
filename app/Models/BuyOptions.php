@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class room_types extends Model
+class BuyOptions extends Model
 {
     use HasFactory;
 
-
     //fillable
     protected $fillable = [
-        'room_type',
-        "room_price",
+        'option_name',
+        'option_days',
     ];
-    
 }

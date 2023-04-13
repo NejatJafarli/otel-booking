@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BuyOptions;
 use App\Models\room;
 use App\Models\room_types;
 use App\Models\transaction;
@@ -19,6 +20,17 @@ class ApiMainController extends Controller
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
+    public function getBuyOptions(){
+        $buyOptions = BuyOptions::all();
+        
+        $array = [];
+        foreach($buyOptions as $buyOption){
+            $array[] = $buyOption->option_name;
+        }
+        
+        
+        return response()->json(['status' => true, 'option_names' => $array]);
+    }
     //
     public function getUser($id)
     {
@@ -33,9 +45,14 @@ class ApiMainController extends Controller
         //have a room
         foreach ($room_types as $room_type) {
             $room_type->have_room = room::where('room_type_id', $room_type->id)->where('status', 0)->count();
+            //unset
         }
+        $room_type->price = $room_type->room_price;
+        $room_type->type = $room_type->room_type;
 
-        return response()->json(['status' => true, 'room_types' => $room_types]);
+        unset($room_type->room_price);
+        unset($room_type->room_type);
+        return response()->json(['status' => "true", 'room_types' => $room_types]);
     }
 
     public function getUserRooms($id)
@@ -54,27 +71,31 @@ class ApiMainController extends Controller
         //validate
         $request->validate(
             [
-                'user_id' => 'required|integer',
+                'walled_id' => 'required',
                 'room_type_id' => 'required|integer',
-                'check_in_date' => 'required|date',
-                'check_out_date' => 'required|date',
-                'amount' => 'required|integer',
+                'buyoptionname' => 'required |string',
             ],
             [
-                'user_id.required' => 'Kullanıcı ID alanı boş bırakılamaz!',
-                'room_type_id.required' => 'Oda tipi ID alanı boş bırakılamaz!',
-                'check_in_date.required' => 'Giriş tarihi alanı boş bırakılamaz!',
-                'check_out_date.required' => 'Çıkış tarihi alanı boş bırakılamaz!',
-                'user_id.integer' => 'Kullanıcı ID sadece sayılardan oluşabilir!',
-                'room_type_id.integer' => 'Oda tipi ID sadece sayılardan oluşabilir!',
-                'check_in_date.date' => 'Giriş tarihi geçerli bir tarih değil!',
-                'check_out_date.date' => 'Çıkış tarihi geçerli bir tarih değil!',
-                'amount.required' => 'Tutar alanı boş bırakılamaz!',
+                'walled_id.required' => 'Cüzdan adresi boş olamaz!',
+                'room_type_id.required' => 'Oda tipi boş olamaz!',
+                'room_type_id.integer' => 'Oda tipi sayı olmalı!',
+                'buyoptionname.required' => 'Satin Alma Tipi boş olamaz!',
+                'buyoptionname.string' => 'Satin Alma Tipi string olmalı!',
             ]
         );
+        //find time type already have or not
+        
+        //find buyOPtions by time type
+        $buyOption = BuyOptions::where('option_name', $request->buyoptionname)->first();
+        if (!$buyOption) {
+            return response()->json(['status' => false, 'message' => 'Satin Alma Tipi bulunamadı!']);
+        }
+        //check in date and check out date
+        $check_in_date = date('Y-m-d');
+        $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
 
         //check if user exists
-        $user = User::find($request->user_id);
+        $user = User::where('wallet_id', $request->walled_id)->first();
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'Kullanıcı bulunamadı!']);
         }
@@ -90,13 +111,12 @@ class ApiMainController extends Controller
         if (!$available_room) {
             return response()->json(['status' => false, 'message' => 'Bu oda tipi için boş oda bulunamadı!']);
         }
-
-        //check if check_in_date and check_out_date is valid
-        $check_in_date = strtotime($request->check_in_date);
-        $check_out_date = strtotime($request->check_out_date);
         if ($check_in_date > $check_out_date) {
             return response()->json(['status' => false, 'message' => 'Giriş tarihi çıkış tarihinden büyük olamaz!']);
         }
+
+        $oneDayPrice= $room_type->room_price;
+        $amount = $oneDayPrice * $buyOption->option_days;
 
 
         $guid = $this->guidGenerator();
@@ -108,14 +128,14 @@ class ApiMainController extends Controller
             'check_in_date' => $request->check_in_date,
             'check_out_date' => $request->check_out_date,
             'transaction_id' => $guid,
-            'transaction_amount' => $request->amount,
+            'transaction_amount' => $amount,
         ]);
         //nulls
         // transaction_status
         // transaction_booking_status
         // transaction_payment_method
 
-        return response()->json(['status' => true, 'transaction_id' => $guid, 'message' => 'Oda satın alma işlemi başarıyla gerçekleştirildi!']);
+        return response()->json(['status' => true, 'transaction_id' => $guid]);
     }
 
     public function buyRoomConfirm(Request $request)
@@ -151,11 +171,34 @@ class ApiMainController extends Controller
         //get room
         $room = room::find($transaction->room_id);
 
-        $room->transaction_id=$transaction->transaction_id;
+        $room->transaction_id = $transaction->transaction_id;
         $room->status = 1; //1 means room is occupied
         $room->save();
 
 
         return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!']);
+
+
+
+        //think this are csharp make me httpclient and post request
+        // var client = new HttpClient();
+        // var values = new Dictionary<string, string>
+        // {
+        //     { "transaction_id", "123456789" },
+        //     { "transaction_status", "1" }
+        // };
+
+        // var content = new FormUrlEncodedContent(values);
+
+        // var response = await client.PostAsync("http://localhost:8000/api/buyRoomConfirm", content);
+
+        //read json response
+        // var responseString = await response.Content.ReadAsStringAsync();
+
+        // var responseJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+        // Console.WriteLine(responseJson["status"]);
+        // Console.WriteLine(responseJson["message"]);
+
     }
 }
