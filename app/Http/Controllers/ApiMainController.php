@@ -8,6 +8,8 @@ use App\Models\room_types;
 use App\Models\transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class ApiMainController extends Controller
 {
@@ -176,7 +178,7 @@ class ApiMainController extends Controller
         $room->save();
 
 
-        return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!']);
+        return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
 
 
 
@@ -200,5 +202,99 @@ class ApiMainController extends Controller
         // Console.WriteLine(responseJson["status"]);
         // Console.WriteLine(responseJson["message"]);
 
+    }
+
+    public function setRoomPassword(Request $req){
+
+        //validate room id and password
+        $req->validate(
+            [
+                'room_number' => 'required|integer',
+                'password' => 'string',
+            ],
+            [
+                'room_number.required' => 'Oda numarası boş olamaz!',
+                'room_number.integer' => 'Oda numarası sadece sayılardan oluşmalı!',
+                'password.required' => 'Şifre boş olamaz!',
+                'password.string' => 'Şifre string olmalı!',
+            ]
+        );
+
+        // find room
+        $room = room::where('room_number',$req->room_number)->first();
+        if(!$room){
+            return response()->json(['status' => false, 'message' => 'Oda bulunamadı!']);
+        }
+
+        //check if room is occupied
+        if($room->status != 1){
+            return response()->json(['status' => false, 'message' => 'Oda boş!']);
+        }
+
+        //get room transaction
+        $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
+
+        //check if transaction is confirmed
+        if($transaction->transaction_status != 1){
+            return response()->json(['status' => false, 'message' => 'İşlem onaylanmamış!']);
+        }
+
+        $transaction->room_password = Hash::make($req->password);
+
+        $transaction->save();
+
+        return response()->json(['status' => true, 'message' => 'Şifre başarıyla ayarlandı!']);
+    }
+
+
+    public function enterRoom(Request $request){
+        //room number and password
+        $request->validate(
+            [
+                'room_number' => 'required|integer',
+                'password' => 'required|string',
+            ],
+            [
+                'room_number.required' => 'Oda numarası boş olamaz!',
+                'room_number.integer' => 'Oda numarası sadece sayılardan oluşmalı!',
+                'password.required' => 'Şifre boş olamaz!',
+                'password.string' => 'Şifre string olmalı!',
+            ]
+        );
+
+        // find room
+        $room = room::where('room_number',$request->room_number)->first();
+        if(!$room){
+            return response()->json(['status' => false, 'message' => 'Oda bulunamadı!']);
+        }
+
+        //check if room is occupied
+        if($room->status != 1){
+            return response()->json(['status' => false, 'message' => 'Oda boş!']);
+        }
+
+        //get room transaction
+        $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
+
+        //check if transaction is confirmed
+        if($transaction->transaction_status != 1){
+            return response()->json(['status' => false, 'message' => 'İşlem onaylanmamış!']);
+        }
+
+        //check dates
+        $check_in_date = Carbon::parse($transaction->check_in_date);
+        $check_out_date = Carbon::parse($transaction->check_out_date);
+        $now = Carbon::now();
+
+        if($now->between($check_in_date,$check_out_date)){
+            //check password
+            if(Hash::check($request->password,$transaction->room_password)){
+                return response()->json(['status' => true, 'message' => 'Odaya giriş başarılı!']);
+            }else{
+                return response()->json(['status' => false, 'message' => 'Şifre yanlış!']);
+            }
+        }else{
+            return response()->json(['status' => false, 'message' => 'Oda için rezervasyon tarihi geçmiş!']);
+        }
     }
 }

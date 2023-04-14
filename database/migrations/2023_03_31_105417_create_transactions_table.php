@@ -27,6 +27,8 @@ class CreateTransactionsTable extends Migration
             $table->string('transaction_status')->nullable(); //0=success, 1=failed
             $table->string('transaction_amount')->nullable();
 
+            //room password
+            $table->string('room_password')->nullable();
 
 
             $table->foreign('room_id')->references('id')->on('rooms');

@@ -20,6 +20,7 @@ class transaction extends Model
         "transaction_amount",
         "transaction_status",
         "status",
+        "room_password"
     ];
 
 
