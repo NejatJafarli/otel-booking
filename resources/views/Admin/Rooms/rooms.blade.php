@@ -184,7 +184,9 @@
                                                 <td>{{ $in_date }} To {{ $out_date }}</td>
                                                 <td>{{ $transaction->transaction_id }}</td>
                                                 <td>{{ $user->username }}</td>
+                                                <td></td>
                                             @else
+                                                <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
@@ -192,7 +194,7 @@
                                             <td class="text-right">
                                                 <button
                                                     onclick="editRoom(
-                                                    { id:{{ $room->id }},room_number:{{ $room->room_number }},room_type:{{ $room->room_type->id }})"
+                                                    { id:{{ $room->id }},room_number:{{ $room->room_number }},room_type:{{ $room->room_type->id }}})"
                                                     type="button" class="btn btn-xs btn-primary btn-icon"
                                                     data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                     <i class="link-icon" data-feather="edit"></i>

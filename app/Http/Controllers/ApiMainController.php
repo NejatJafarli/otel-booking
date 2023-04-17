@@ -42,19 +42,22 @@ class ApiMainController extends Controller
 
     public function getRoomTypes()
     {
+
         $room_types = room_types::all();
 
         //have a room
         foreach ($room_types as $room_type) {
-            $room_type->have_room = room::where('room_type_id', $room_type->id)->where('status', 0)->count();
+            $room_type->have_room = room::where('room_type_id', $room_type->id)->where('room_status', 0)->count();
             //unset
+            $room_type->price = $room_type->room_price;
+            $room_type->type = $room_type->id;
+            $room_type->name = $room_type->room_type;
+            unset($room_type->room_price);
+            unset($room_type->room_type);
+            unset($room_type->id);
         }
-        $room_type->price = $room_type->room_price;
-        $room_type->type = $room_type->room_type;
 
-        unset($room_type->room_price);
-        unset($room_type->room_type);
-        return response()->json(['status' => "true", 'room_types' => $room_types]);
+        return response()->json(['status' => true, 'room_types' => $room_types]);
     }
 
     public function getUserRooms($id)
@@ -73,12 +76,12 @@ class ApiMainController extends Controller
         //validate
         $request->validate(
             [
-                'walled_id' => 'required',
+                'wallet_id' => 'required',
                 'room_type_id' => 'required|integer',
                 'buyoptionname' => 'required |string',
             ],
             [
-                'walled_id.required' => 'Cüzdan adresi boş olamaz!',
+                'wallet_id.required' => 'Cüzdan adresi boş olamaz!',
                 'room_type_id.required' => 'Oda tipi boş olamaz!',
                 'room_type_id.integer' => 'Oda tipi sayı olmalı!',
                 'buyoptionname.required' => 'Satin Alma Tipi boş olamaz!',
@@ -86,6 +89,7 @@ class ApiMainController extends Controller
             ]
         );
         //find time type already have or not
+
         
         //find buyOPtions by time type
         $buyOption = BuyOptions::where('option_name', $request->buyoptionname)->first();
@@ -95,9 +99,8 @@ class ApiMainController extends Controller
         //check in date and check out date
         $check_in_date = date('Y-m-d');
         $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
-
         //check if user exists
-        $user = User::where('wallet_id', $request->walled_id)->first();
+        $user = User::where('wallet_id', $request->wallet_id)->first();
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'Kullanıcı bulunamadı!']);
         }
@@ -109,7 +112,7 @@ class ApiMainController extends Controller
         }
 
         //check available room
-        $available_room = room::where('room_type_id', $room_type->id)->where('status', 0)->first();
+        $available_room = room::where('room_type_id', $room_type->id)->where('room_status', 0)->first();
         if (!$available_room) {
             return response()->json(['status' => false, 'message' => 'Bu oda tipi için boş oda bulunamadı!']);
         }
@@ -125,10 +128,10 @@ class ApiMainController extends Controller
 
         transaction::create([
             'room_id' => $available_room->id,
-            'user_id' => $request->user_id,
+            'user_id' => $user->id,
             'wallet_id' => $user->wallet_id,
-            'check_in_date' => $request->check_in_date,
-            'check_out_date' => $request->check_out_date,
+            'check_in_date' => $check_in_date,
+            'check_out_date' => $check_out_date,
             'transaction_id' => $guid,
             'transaction_amount' => $amount,
         ]);
@@ -137,7 +140,7 @@ class ApiMainController extends Controller
         // transaction_booking_status
         // transaction_payment_method
 
-        return response()->json(['status' => true, 'transaction_id' => $guid]);
+        return response()->json(['status' => true, 'transaction_id' => $guid,"message"=>"İşlem başarılı bir şekilde oluşturuldu!"]);
     }
 
     public function buyRoomConfirm(Request $request)
@@ -162,24 +165,25 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'İşlem bulunamadı!']);
         }
 
-        //check if transaction status is 0
-        if ($transaction->transaction_status != 0) {
-            return response()->json(['status' => false, 'message' => 'İşlem zaten onaylanmış!']);
-        }
-
         $transaction->transaction_status = $request->transaction_status;
         $transaction->save();
 
-        //get room
-        $room = room::find($transaction->room_id);
-
-        $room->transaction_id = $transaction->transaction_id;
-        $room->status = 1; //1 means room is occupied
-        $room->save();
+        if($request->transaction_status==0){
 
 
-        return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
+            //get room
+            $room = room::find($transaction->room_id);
 
+            $room->transaction_id = $transaction->transaction_id;
+            $room->room_status = 1; //1 means room is occupied
+            $room->save();
+
+
+            return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
+
+        }else{
+            return response()->json(['status' => true, 'message' => 'İşlem onaylanmadı!']);
+        }
 
 
         //think this are csharp make me httpclient and post request
@@ -227,7 +231,7 @@ class ApiMainController extends Controller
         }
 
         //check if room is occupied
-        if($room->status != 1){
+        if($room->room_status != 1){
             return response()->json(['status' => false, 'message' => 'Oda boş!']);
         }
 
@@ -235,7 +239,7 @@ class ApiMainController extends Controller
         $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
 
         //check if transaction is confirmed
-        if($transaction->transaction_status != 1){
+        if($transaction->transaction_status != 0){
             return response()->json(['status' => false, 'message' => 'İşlem onaylanmamış!']);
         }
 
@@ -246,6 +250,35 @@ class ApiMainController extends Controller
         return response()->json(['status' => true, 'message' => 'Şifre başarıyla ayarlandı!']);
     }
 
+    public function getBookedRooms(Request $request){
+        //wallet id 
+        $request->validate(
+            [
+                'wallet_id' => 'required|string',
+            ],
+            [
+                'wallet_id.required' => 'Cüzdan ID boş olamaz!',
+                'wallet_id.string' => 'Cüzdan ID sadece harflerden oluşmalı!',
+            ]
+        );
+        //get all user transactions check if transaction status is 0 and check in date and check out date between now
+        $transactions = transaction::where('wallet_id',$request->wallet_id)->where('transaction_status',0)->where('check_out_date','>=',now())->get();
+        if(!$transactions){
+            return response()->json(['status' => false, 'message' => 'Rezervasyon bulunamadı!']);
+        }
+        $rooms = [];
+        foreach($transactions as $transaction){
+            $room = room::find($transaction->room_id);
+
+            //get room type id and number
+            $room_type = $room->room_type()->first()->id;
+            $room_number = $room->room_number;
+            //add room to array
+            array_push($rooms,["room_type"=>$room_type,"room_number"=>$room_number,"room_type_name"=>$room->room_type()->first()->room_type]);
+        }
+
+        return response()->json(['status' => true, 'message' => 'Rezervasyonlar başarıyla getirildi!',"BookedRooms"=>$rooms]);
+    }
 
     public function enterRoom(Request $request){
         //room number and password
@@ -269,7 +302,7 @@ class ApiMainController extends Controller
         }
 
         //check if room is occupied
-        if($room->status != 1){
+        if($room->room_status != 1){
             return response()->json(['status' => false, 'message' => 'Oda boş!']);
         }
 
@@ -277,7 +310,7 @@ class ApiMainController extends Controller
         $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
 
         //check if transaction is confirmed
-        if($transaction->transaction_status != 1){
+        if($transaction->transaction_status != 0){
             return response()->json(['status' => false, 'message' => 'İşlem onaylanmamış!']);
         }
 
@@ -289,7 +322,7 @@ class ApiMainController extends Controller
         if($now->between($check_in_date,$check_out_date)){
             //check password
             if(Hash::check($request->password,$transaction->room_password)){
-                return response()->json(['status' => true, 'message' => 'Odaya giriş başarılı!']);
+                return response()->json(['status' => true, 'message' => 'Odaya giriş başarılı!',"room_type"=>$room->room_type()->first()->id]);
             }else{
                 return response()->json(['status' => false, 'message' => 'Şifre yanlış!']);
             }

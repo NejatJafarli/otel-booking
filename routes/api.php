@@ -39,6 +39,7 @@ Route::post('user/setRoomPassword', [ApiMainController::class, 'setRoomPassword'
 
 //enter room
 Route::post('enterRoom', [ApiMainController::class, 'enterRoom']);
+Route::post('getBookedRooms', [ApiMainController::class, 'getBookedRooms']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();

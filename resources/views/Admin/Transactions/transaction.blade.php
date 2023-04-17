@@ -61,6 +61,7 @@
                                     <th class="pt-0">#</th>
                                     <th class="pt-0">Oda Numarasi</th>
                                     <th class="pt-0">Oda Tipi</th>
+                                    <th class="pt-0">Otel Ismi</th>
                                     <th class="pt-0">Kullanici Adi</th>
                                     <th class="pt-0">Check in Tarihi</th>
                                     <th class="pt-0">Check Out Tarihi</th>
@@ -74,6 +75,7 @@
                                         <td>{{ $tran->id }}</td>
                                         <td>{{ $tran->room->room_number }}</td>
                                         <td>{{ $tran->room->room_type()->first()->room_type }}</td>
+                                        <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
                                         <td>{{ $tran->user->username }}</td>
                                         <td>{{ $tran->check_in_date }}</td>
                                         <td>{{ $tran->check_out_date }}</td>

@@ -24,8 +24,6 @@ class ApiAuthController extends Controller
                 'username.unique' => 'Bu kullanıcı adı daha önce alınmış!',
                 "character_number.integer" => "Karakter ID sadece sayılardan oluşabilir!",
                 "wallet_id.required" => "Cüzdan ID alanı boş bırakılamaz!",
-
-
             ]
         );
         $user= User::where('wallet_id', $request->wallet_id)->first();
@@ -40,7 +38,7 @@ class ApiAuthController extends Controller
         $user = User::create([
             'username' => $request->username,
             'wallet_id' => $request->wallet_id,
-            'character_number' => $request->character_id,
+            'character_number' => $request->character_number,
         ]);
 
         //return user

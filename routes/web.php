@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminMainController;
 use App\Http\Controllers\AdminRoomController;
 use App\Http\Controllers\AdminTransactionController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminHotelController;
+use App\Http\Controllers\AdminFinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +47,24 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
     Route::get('/dashboard', [AdminMainController::class, 'dashboard'])->name('adminDashboard');
     //route admin/logout
     Route::get('/logout', [AdminAuthController::class, 'logout'])->name('adminLogout');
+    
+    Route::group(['prefix' => 'room_types'],function () {
+
+        Route::get('', [AdminRoomController::class, 'roomTypes'])->name('roomTypes');
+        // //route admin/rooms/create
+        Route::post('/create', [AdminRoomController::class, 'createRoomType'])->name('createRoomType');
+
+        //delete room
+        Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoomType'])->name('deleteRoomType');
+        // //route admin/rooms/store
+        Route::post('/edit', [AdminRoomController::class, 'editRoomType'])->name('editRoomType');
+    });
+
+    Route::group(['prefix' => 'finance'],function () {
+
+        Route::get('', [AdminFinanceController::class, 'raporlar'])->name('raporlar');
+       
+    });
 
     //route group Rooms
     Route::group(['prefix' => 'rooms'], function () {
@@ -64,7 +84,17 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         // //route admin/rooms/delete/{id}
         // Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoom'])->name('DeleteRoom');
     });
+    Route::group(['prefix' => 'hotels'], function () {
+        //route admin/hotels
+        Route::get('', [AdminHotelController::class, 'hotels'])->name('hotels');
+        // //route admin/hotels/create
+        Route::post('/create', [AdminHotelController::class, 'createHotel'])->name('createHotel');
 
+        //delete hotel
+        Route::get('/delete/{id}', [AdminHotelController::class, 'deleteHotel'])->name('deleteHotel');
+    
+
+    });
     //route prefix user
     Route::group(['prefix' => 'users'], function () {
         //route admin/users
