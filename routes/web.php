@@ -63,6 +63,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
     Route::group(['prefix' => 'finance'],function () {
 
         Route::get('', [AdminFinanceController::class, 'raporlar'])->name('raporlar');
+        Route::post('/getDatas', [AdminFinanceController::class, 'datebydateReports'])->name('datebydateReports');
        
     });
 

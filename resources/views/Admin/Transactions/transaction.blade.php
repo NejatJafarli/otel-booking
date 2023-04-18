@@ -1,5 +1,7 @@
 @extends('layout/master')
-
+@section('header')
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+@endsection
 @section('content')
     <div class="row flex-grow-1">
         <div class="col-md-12 grid-margin stretch-card">
@@ -55,7 +57,8 @@
 
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+
+                        <table id="MyDataTable" class="table table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th class="pt-0">#</th>
@@ -65,7 +68,7 @@
                                     <th class="pt-0">Kullanici Adi</th>
                                     <th class="pt-0">Trancation Id</th>
 
-                                    <th colspan="2" class="pt-0">Durum</th>
+                                    <th class="pt-0">Durum</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,51 +85,61 @@
                                             <td><span class="badge bg-success">Onaylandi</span></td>
                                         @elseif($tran->transaction_status == 2)
                                             <td><span class="badge bg-warning">Onay Bekliyor</span></td>
-                                            @elseif($tran->transaction_status == 1)
+                                        @elseif($tran->transaction_status == 1)
                                             <td><span class="badge bg-danger">Iptal Edildi</span></td>
                                         @endif
                                     </tr>
                                 @endforeach
-                                {{-- <tr>
-                                        <td>1</td>
-                                        <td>Kaan Pargan</td>
-                                        <td>kaanpargan@gmail.com</td>
-                                        <td>+905338436662</td>
-                                        <td>2022-11-09 22:06:39</td>
-                                        <td class="text-right">
-                                            <button type="button" class="btn btn-xs btn-primary btn-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="feather feather-check-square">
-                                                    <polyline points="9 11 12 14 22 4"></polyline>
-                                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-danger btn-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="feather feather-x-square">
-                                                    <rect x="3" y="3" width="18" height="18"
-                                                        rx="2" ry="2"></rect>
-                                                    <line x1="9" y1="9" x2="15" y2="15">
-                                                    </line>
-                                                    <line x1="15" y1="9" x2="9" y2="15">
-                                                    </line>
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr> --}}
                             </tbody>
                         </table>
-
-                        <div class="d-flex justify-content-center pt-4">
-                            {{ $transactions->onEachSide(2)->links() }}
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    @endsection
+    @section('js')
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+        <script>
+            // npm package: datatables.net-bs5
+            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+            // npm package: datatables.net-bs5
+            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+
+            $(function() {
+                'use strict';
+
+                $(function() {
+                    $('#MyDataTable').DataTable({
+                        "aLengthMenu": [
+                            [10, 30, 50, -1],
+                            [10, 30, 50, "All"]
+                        ],
+                        "iDisplayLength": 10,
+                        "language": {
+                            search: ""
+                        },
+                        "order": [
+                            [0, "desc"]
+                        ]
+                    });
+                    $('#MyDataTable').each(function() {
+
+
+                        var datatable = $(this);
+                        // SEARCH - Add the placeholder for Search and Turn this into in-line form control
+                        var search_input = datatable.closest('.dataTables_wrapper').find(
+                            'div[id$=_filter] input');
+                        search_input.attr('placeholder', 'Search');
+                        search_input.removeClass('form-control-sm');
+                        // LENGTH - Inline-Form control
+                        var length_sel = datatable.closest('.dataTables_wrapper').find(
+                            'div[id$=_length] select');
+                        length_sel.removeClass('form-control-sm');
+                    });
+                });
+
+            });
+        </script>
     @endsection

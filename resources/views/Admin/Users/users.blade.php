@@ -337,7 +337,10 @@
                         "iDisplayLength": 10,
                         "language": {
                             search: ""
-                        }
+                        },
+                        "order": [
+                            [0, "desc"]
+                        ]
                     });
                     $('#MyDataTable').each(function() {
                         var datatable = $(this);

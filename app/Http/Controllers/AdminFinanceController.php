@@ -58,7 +58,7 @@ class AdminFinanceController extends Controller
 {
     $regex = $amount / 100;
     $usd = number_format($regex, 2, '.', ',');
-    return $usd . '$';
+    return "$ ".$usd;
 }
 
     public function raporlar(){
@@ -94,5 +94,17 @@ class AdminFinanceController extends Controller
 
         
         return view('Admin/Finance/raporlar',['data_7' => $data_7, 'data_30' => $data_30, 'data_7_sum' => $data_7_sum, 'data_30_sum' => $data_30_sum, 'data_60' => $data_60, 'data_60_sum' => $data_60_sum]);
+    }
+
+    public function datebydateReports(Request $req){
+        $startDate = $req->startDate;
+        $endDate = $req->endDate;
+        $Maindata = transaction::where('transaction_status',0)->where('created_at','>=',$startDate)->where('created_at','<=',$endDate);
+        $data_sum=$this->moneyAmerican($Maindata->sum('transaction_amount'));
+        $data_count = $Maindata->count();
+        $data = $Maindata->selectRaw('DATE(created_at) as date, sum(transaction_amount) as amount, count(*) as count')->groupBy('date')->get();
+        //return json response 
+        return response()->json(["status"=>true,'data' => $data, 'data_sum' => $data_sum, 'data_count' => $data_count]);
+        
     }
 }

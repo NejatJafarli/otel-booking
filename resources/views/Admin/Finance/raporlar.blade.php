@@ -27,9 +27,9 @@
                                                         {{ $data_7_sum }}
                                                         <div class="d-flex align-items-baseline">
                                                             <!--<p class="text-success">
-                                                                                <span>+3.3%</span>
-                                                                                <i data-feather="arrow-up" class="icon-sm mb-1"></i>
-                                                                            </p>-->
+                                                                                                    <span>+3.3%</span>
+                                                                                                    <i data-feather="arrow-up" class="icon-sm mb-1"></i>
+                                                                                                </p>-->
                                                         </div>
                                                 </div>
                                                 <div class="col-6 col-md-12 col-xl-7">
@@ -47,7 +47,7 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-6 col-md-12 col-xl-5">
-                                                    <h3 class="mb-2"> 
+                                                    <h3 class="mb-2">
                                                         {{ $data_30_sum }}
 
                                                         <div class="d-flex align-items-baseline">
@@ -163,7 +163,7 @@
                                                             <div class="row">
                                                                 <div class="col-6 col-md-12 col-xl-5">
                                                                     <h3 class="mb-2">
-                                                                        <h3 class="mb-2" id="aralikPrice">0 ₺
+                                                                        <h3 class="mb-2" id="aralikPrice">$ 0
                                                                         </h3>
                                                                         <div class="d-flex align-items-baseline">
                                                                         </div>
@@ -216,18 +216,22 @@
             window.MyData = @json($data_7);
             window.chart2 = new CanvasJS.Chart("haftalik", {
                 animationEnabled: true,
-                 backgroundColor: "#0c1427",
-                 //text color
-                 lineColor:"#",
+                backgroundColor: "#0c1427",
+                //text color
+                lineColor: "#",
                 title: {
                     text: "Satış Grafiği",
-                 fontColor:"#ffbc00",
+                    fontColor: "#ffbc00",
+                },
+                axisX: {
+                    labelFontColor: "#ffbc00",
+                    labelFontSize: 11
                 },
                 axisY: {
                     title: "TL Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
-                    labelFontColor:"#ffbc00",
+                    labelFontColor: "#ffbc00",
                     titleFontColor: "#ffbc00" // Set the Y-axis title text color
                 },
                 data: [{
@@ -265,18 +269,22 @@
             window.MyData = @json($data_30);
             window.chart3 = new CanvasJS.Chart("aylik", {
                 animationEnabled: true,
-                 backgroundColor: "#0c1427",
-                 //text color
-                 lineColor:"#",
+                backgroundColor: "#0c1427",
+                //text color
+                lineColor: "#",
                 title: {
                     text: "Satış Grafiği",
-                 fontColor:"#ffbc00",
+                    fontColor: "#ffbc00",
+                },
+                axisX: {
+                    labelFontColor: "#ffbc00",
+                    labelFontSize: 11
                 },
                 axisY: {
                     title: "TL Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
-                    labelFontColor:"#ffbc00",
+                    labelFontColor: "#ffbc00",
                     titleFontColor: "#ffbc00" // Set the Y-axis title text color
                 },
                 data: [{
@@ -314,19 +322,23 @@
             window.MyData = @json($data_60);
             window.chart4 = new CanvasJS.Chart("gecenay", {
                 animationEnabled: true,
-                 backgroundColor: "#0c1427",
-                 //text color
-                 lineColor:"#",
+                backgroundColor: "#0c1427",
+                //text color
+                lineColor: "#",
                 title: {
                     text: "Satış Grafiği",
-                 fontColor:"#ffbc00",
+                    fontColor: "#ffbc00",
                 },
                 axisY: {
                     title: "TL Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
-                    labelFontColor:"#ffbc00",
+                    labelFontColor: "#ffbc00",
                     titleFontColor: "#ffbc00" // Set the Y-axis title text color
+                },
+                axisX: {
+                    labelFontColor: "#ffbc00",
+                    labelFontSize: 11
                 },
                 data: [{
                     type: "spline",
@@ -361,6 +373,118 @@
                 }]
             });
         }
+
+        // btnSubmitTwoDates
+        let button = document.getElementById("btnSubmitTwoDates");
+
+        //add click event
+        button.addEventListener("click", function() {
+            //get the dates
+            let startDate = document.getElementById("startDate").value;
+            let endDate = document.getElementById("endDate").value;
+
+            //check if the dates are empty
+            if (startDate == "" || endDate == "") {
+                alert("Lütfen tarihleri seçiniz");
+                return;
+            }
+
+            //check if the start date is greater than end date
+            if (new Date(startDate) > new Date(endDate)) {
+                alert("Başlangıç tarihi bitiş tarihinden büyük olamaz");
+                return;
+            }
+            let data = {
+                _token: "{{ csrf_token() }}",
+                startDate: startDate,
+                endDate: endDate
+            }
+            $.ajax({
+                type: "POST",
+                data: data,
+                url: "{{ route('datebydateReports') }}",
+                success: function(response) {
+                    console.log(response);
+                    if (response.status) {
+                        window.chart5 = new CanvasJS.Chart("aralikli", {
+                            animationEnabled: true,
+                            backgroundColor: "#0c1427",
+                            //text color
+                            lineColor: "#",
+                            title: {
+                                text: "Satış Grafiği",
+                                fontColor: "#ffbc00",
+                            },
+                            axisX: {
+                                labelFontColor: "#ffbc00",
+                                labelFontSize: 11
+                            },
+                            axisY: {
+                                title: "TL Değeri",
+                                titleFontSize: 24,
+                                valueFormatSting: "#,###,.## ₺",
+                                labelFontColor: "#ffbc00",
+                                titleFontColor: "#ffbc00" // Set the Y-axis title text color
+                            },
+                            data: [{
+                                type: "spline",
+                                lineColor: "#ffbc00",
+                                valueFormatSting: "#,###,.## ₺",
+                                dataPoints: response.data.map(function(item) {
+                                    console.log(item);
+                                    var amount = isNaN(item.amount) ? 0 :
+                                        parseFloat(item.amount);
+                                    amount = amount / 100;
+                                    // amount is 330000
+                                    //convert it to 3300.00 
+                                    let count = item.count;
+                                    //this is the string you want to display in the tooltip like "6 Adet Satildi Toplam Tutar : 3300.00 ₺"
+                                    let date = new Date(item.date);
+
+                                    let dateString = date.toLocaleDateString(
+                                        "en-GB", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric"
+                                        });
+
+                                    let string = count +
+                                        " Adet Satildi Toplam Tutar : " +
+                                        amount + " ₺";
+                                    //add date to string
+                                    string = dateString + " => " + string;
+
+                                    return {
+                                        x: date,
+                                        y: amount,
+                                        toolTipContent: string
+                                    };
+                                })
+                            }]
+                        });
+
+                        //render
+                        window.chart5.render();
+
+                        // response.data_sum
+                        // aralikCount
+                        let aralikCount = document.getElementById("aralikCount");
+                        aralikCount.innerHTML = response.data_count;
+
+                        // aralikPrice
+                        let aralikPrice = document.getElementById("aralikPrice");
+                        aralikPrice.innerHTML = response.data_sum;
+                    } else {
+                        Swal.fire(
+                            'Hata!',
+                            'Error',
+                            'error'
+                        )
+                    }
+                }
+            });
+        });
+
 
         function OnClickAylik() {
             //check chart3 is rendered or not

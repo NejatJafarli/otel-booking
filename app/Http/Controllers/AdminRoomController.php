@@ -31,7 +31,7 @@ class AdminRoomController extends Controller
     }
 
     public function roomTypes(){
-        $types = room_types::orderBy('id', 'desc')->paginate(10);
+        $types = room_types::orderBy('id', 'desc')->get();
         $room_type_count = room_types::count();
 
 

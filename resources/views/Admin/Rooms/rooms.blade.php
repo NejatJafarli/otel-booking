@@ -144,7 +144,7 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table  id="MyDataTable" class="table table-hover mb-0">
+                            <table id="MyDataTable" class="table table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th class="pt-0">#</th>
@@ -398,7 +398,10 @@
                     "iDisplayLength": 10,
                     "language": {
                         search: ""
-                    }
+                    },
+                    "order": [
+                        [0, "desc"]
+                    ]
                 });
                 $('#MyDataTable').each(function() {
                     var datatable = $(this);
@@ -417,4 +420,3 @@
         });
     </script>
 @endsection
-

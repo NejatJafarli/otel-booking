@@ -4,6 +4,10 @@
     use App\Models\transaction;
     use App\Models\User;
 @endphp
+
+@section('header')
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+@endsection
 @section('content')
     <div class="row flex-grow-1">
         <div class="col-md-12 grid-margin stretch-card">
@@ -124,13 +128,14 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table id="MyDataTable" class="table table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th class="pt-0">#</th>
                                     <th class="pt-0">Oda Tipi Ismi</th>
                                     <th class="pt-0">ait oldugu Hotel Ismi</th>
-                                    <th colspan="2" class="pt-0">Oda Fiyati</th>
+                                    <th class="pt-0">Oda Fiyati</th>
+                                    <th class="pt-0">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -159,11 +164,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <div class="d-flex justify-content-center pt-4">
-                            {{ $types->onEachSide(2)->links() }}
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -343,3 +343,47 @@
         }
     </script>
 @endsection
+@section('js')
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+        <script>
+            // npm package: datatables.net-bs5
+            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+            // npm package: datatables.net-bs5
+            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+
+            $(function() {
+                'use strict';
+
+                $(function() {
+                    $('#MyDataTable').DataTable({
+                        "aLengthMenu": [
+                            [10, 30, 50, -1],
+                            [10, 30, 50, "All"]
+                        ],
+                        "iDisplayLength": 10,
+                        "language": {
+                            search: ""
+                        },
+                        "order": [
+                            [0, "desc"]
+                        ]
+                    });
+                    $('#MyDataTable').each(function() {
+                        var datatable = $(this);
+                        // SEARCH - Add the placeholder for Search and Turn this into in-line form control
+                        var search_input = datatable.closest('.dataTables_wrapper').find(
+                            'div[id$=_filter] input');
+                        search_input.attr('placeholder', 'Search');
+                        search_input.removeClass('form-control-sm');
+                        // LENGTH - Inline-Form control
+                        var length_sel = datatable.closest('.dataTables_wrapper').find(
+                            'div[id$=_length] select');
+                        length_sel.removeClass('form-control-sm');
+                    });
+                });
+
+            });
+        </script>
+    @endsection
