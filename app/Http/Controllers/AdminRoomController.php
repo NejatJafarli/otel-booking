@@ -146,16 +146,20 @@ class AdminRoomController extends Controller
     // deleteRoom
     public function deleteRoom($id)
     {
-        //find room
         $room = room::find($id);
-        //delete room
-        $room->delete();
-
-        //return json response
-        return response()->json([
-            "status" => true,
-            "message" => "Oda başarıyla silindi!"
-        ], 200);
+        if ($room) {
+            $room->delete();
+            return response()->json([
+                "status" => true,
+                "message" => "Oda başarıyla silindi!"
+            ], 200);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Oda bulunamadı!"
+            ], 200);
+        }
+        
     }
 
     //editRoom

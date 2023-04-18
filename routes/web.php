@@ -102,14 +102,12 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         Route::get('', [AdminUserController::class, 'users'])->name('users');
         // //route admin/users/create
         Route::post('/create', [AdminUserController::class, 'createUser'])->name('createUser');
-        // //route admin/users/store
-        // Route::post('/store', [AdminUserController::class, 'storeUser'])->name('StoreUser');
-        // //route admin/users/edit/{id}
-        // Route::get('/edit/{id}', [AdminUserController::class, 'editUser'])->name('EditUser');
-        // //route admin/users/update/{id}
-        // Route::post('/update/{id}', [AdminUserController::class, 'updateUser'])->name('UpdateUser');
-        // //route admin/users/delete/{id}
-        // Route::get('/delete/{id}', [AdminUserController::class, 'deleteUser'])->name('DeleteUser');
+
+        Route::get('/delete/{id}', [AdminUserController::class, 'deleteUser'])->name('deleteUser');
+
+        Route::post('/edit', [AdminUserController::class, 'editUser'])->name('editUser');
+
+        
     });
 
     Route::group(['prefix' => 'trans'], function () {
