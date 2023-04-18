@@ -92,6 +92,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
 
         //delete hotel
         Route::get('/delete/{id}', [AdminHotelController::class, 'deleteHotel'])->name('deleteHotel');
+        Route::get('/edit', [AdminHotelController::class, 'editHotel'])->name('editHotel');
     
 
     });

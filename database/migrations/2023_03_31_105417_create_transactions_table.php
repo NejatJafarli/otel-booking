@@ -19,8 +19,8 @@ class CreateTransactionsTable extends Migration
             $table->unsignedBigInteger('room_id');
             $table->string('wallet_id');
             //start date, end date, duration
-            $table->date('check_in_date');
-            $table->date('check_out_date');
+            $table->timestamps('check_in_date');
+            $table->timestamps('check_out_date');
             //transaction_id\
             $table->string('transaction_id');
             

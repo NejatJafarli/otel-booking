@@ -70,7 +70,7 @@
                                                 <div class="col-6 col-md-12 col-xl-5">
                                                     <h3 class="mb-2">
                                                         <h3 class="mb-2">
-                                                            5000
+                                                            {{ $data_60_sum }}
                                                         </h3>
                                                         <div class="d-flex align-items-baseline">
                                                         </div>
@@ -212,25 +212,30 @@
 
     {{-- i have data name is data and data is assosative array convert to json and i want to show this data in chart --}}
     <script>
-        window.MyData = @json($data_7);
-    </script>
-    <script>
         window.onload = function() {
+            window.MyData = @json($data_7);
             window.chart2 = new CanvasJS.Chart("haftalik", {
                 animationEnabled: true,
+                 backgroundColor: "#0c1427",
+                 //text color
+                 lineColor:"#",
                 title: {
-                    text: "Satış Grafiği"
+                    text: "Satış Grafiği",
+                 fontColor:"#ffbc00",
                 },
                 axisY: {
                     title: "TL Değeri",
                     titleFontSize: 24,
-                    valueFormatSting: "#,###,.## ₺"
+                    valueFormatSting: "#,###,.## ₺",
+                    labelFontColor:"#ffbc00",
+                    titleFontColor: "#ffbc00" // Set the Y-axis title text color
                 },
                 data: [{
-
                     type: "spline",
+                    lineColor: "#ffbc00",
                     valueFormatSting: "#,###,.## ₺",
                     dataPoints: MyData.map(function(item) {
+                        console.log(item);
                         var amount = isNaN(item.amount) ? 0 : parseFloat(item.amount);
                         amount = amount / 100;
                         // amount is 330000
@@ -306,7 +311,55 @@
                 }]
             });
             window.chart3.render();
+            window.MyData = @json($data_60);
+            window.chart4 = new CanvasJS.Chart("gecenay", {
+                animationEnabled: true,
+                 backgroundColor: "#0c1427",
+                 //text color
+                 lineColor:"#",
+                title: {
+                    text: "Satış Grafiği",
+                 fontColor:"#ffbc00",
+                },
+                axisY: {
+                    title: "TL Değeri",
+                    titleFontSize: 24,
+                    valueFormatSting: "#,###,.## ₺",
+                    labelFontColor:"#ffbc00",
+                    titleFontColor: "#ffbc00" // Set the Y-axis title text color
+                },
+                data: [{
+                    type: "spline",
+                    lineColor: "#ffbc00",
+                    valueFormatSting: "#,###,.## ₺",
+                    dataPoints: MyData.map(function(item) {
+                        console.log(item);
+                        var amount = isNaN(item.amount) ? 0 : parseFloat(item.amount);
+                        amount = amount / 100;
+                        // amount is 330000
+                        //convert it to 3300.00 
+                        let count = item.count;
+                        //this is the string you want to display in the tooltip like "6 Adet Satildi Toplam Tutar : 3300.00 ₺"
+                        let date = new Date(item.date);
 
+                        let dateString = date.toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        });
+
+                        let string = count + " Adet Satildi Toplam Tutar : " + amount + " ₺";
+                        //add date to string
+                        string = dateString + " => " + string;
+
+                        return {
+                            x: date,
+                            y: amount,
+                            toolTipContent: string
+                        };
+                    })
+                }]
+            });
         }
 
         function OnClickAylik() {

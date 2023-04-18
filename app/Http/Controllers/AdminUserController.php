@@ -13,11 +13,13 @@ class AdminUserController extends Controller
     public function users()
     {
 
-        $users = User::paginate(10);
+        $users = User::orderBy('id', 'desc')->get();
 
         $user_count= User::count();
 
         return view('Admin/Users/users',['users' => $users, 'user_count' => $user_count]);
     }
+
+    
 
 }

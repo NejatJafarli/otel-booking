@@ -14,7 +14,7 @@ class AdminRoomController extends Controller
     public function rooms()
     {
         //get all rooms with pagination
-        $rooms = room::paginate(10);
+        $rooms = room::orderBy('id', 'desc')->paginate(10);
 
         //get count of all rooms
         $rooms_count = room::count();
@@ -31,7 +31,7 @@ class AdminRoomController extends Controller
     }
 
     public function roomTypes(){
-        $types = room_types::paginate(10);
+        $types = room_types::orderBy('id', 'desc')->paginate(10);
         $room_type_count = room_types::count();
 
 

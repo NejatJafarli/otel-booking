@@ -134,6 +134,7 @@ class ApiMainController extends Controller
             'check_out_date' => $check_out_date,
             'transaction_id' => $guid,
             'transaction_amount' => $amount,
+            "transaction_status"=>"2"
         ]);
         //nulls
         // transaction_status
@@ -165,47 +166,27 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'İşlem bulunamadı!']);
         }
 
-        $transaction->transaction_status = $request->transaction_status;
-        $transaction->save();
+      
 
-        if($request->transaction_status==0){
+        if($transaction->transaction_status==2){
 
+            if($request->transaction_status==0){
+                //get room
+                $room = room::find($transaction->room_id);
 
-            //get room
-            $room = room::find($transaction->room_id);
+                $room->transaction_id = $transaction->transaction_id;
+                $room->room_status = 1; //1 means room is occupied
+                $room->save();
+            }
 
-            $room->transaction_id = $transaction->transaction_id;
-            $room->room_status = 1; //1 means room is occupied
-            $room->save();
-
-
+            $transaction->transaction_status = $request->transaction_status;
+            $transaction->save();
             return response()->json(['status' => true, 'message' => 'İşlem başarıyla onaylandı!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
 
         }else{
-            return response()->json(['status' => true, 'message' => 'İşlem onaylanmadı!']);
+            //islem Status u pending de degil 
+            return response()->json(['status' => false, 'message' => 'İşlem Beklemede Değil!']);
         }
-
-
-        //think this are csharp make me httpclient and post request
-        // var client = new HttpClient();
-        // var values = new Dictionary<string, string>
-        // {
-        //     { "transaction_id", "123456789" },
-        //     { "transaction_status", "1" }
-        // };
-
-        // var content = new FormUrlEncodedContent(values);
-
-        // var response = await client.PostAsync("http://localhost:8000/api/buyRoomConfirm", content);
-
-        //read json response
-        // var responseString = await response.Content.ReadAsStringAsync();
-
-        // var responseJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-
-        // Console.WriteLine(responseJson["status"]);
-        // Console.WriteLine(responseJson["message"]);
-
     }
 
     public function setRoomPassword(Request $req){

@@ -261,16 +261,15 @@
                     //ajax ile silme islemi
                     let data = {
                         _token: "{{ csrf_token() }}",
-                        room_type_id: $('#edit_id').val(),
-                        room_type_name: $('#edit_room_type').val(),
-                        room_price: $('#edit_room_price').val(),
                         hotel_id: $('#edit_hotel_id').val(),
+                        hotelname: $('#edit_hotelname').val(),
+                        hoteladdress: $('#edit_hoteladdress').val(),
                     }
                     console.log(data);
                     $.ajax({
                         type: "POST",
                         data: data,
-                        url: "{{ route('editRoomType') }}",
+                        url: "{{ route('editHotel') }}",
                         success: function(response) {
                             console.log(response);
                             if (response.status) {

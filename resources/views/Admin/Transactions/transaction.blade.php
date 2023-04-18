@@ -63,10 +63,9 @@
                                     <th class="pt-0">Oda Tipi</th>
                                     <th class="pt-0">Otel Ismi</th>
                                     <th class="pt-0">Kullanici Adi</th>
-                                    <th class="pt-0">Check in Tarihi</th>
-                                    <th class="pt-0">Check Out Tarihi</th>
-                                    <th class="pt-0">Durum</th>
-                                    <th colspan="2" class="pt-0">Oda Kayit Tarihi</th>
+                                    <th class="pt-0">Trancation Id</th>
+
+                                    <th colspan="2" class="pt-0">Durum</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,9 +76,15 @@
                                         <td>{{ $tran->room->room_type()->first()->room_type }}</td>
                                         <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
                                         <td>{{ $tran->user->username }}</td>
-                                        <td>{{ $tran->check_in_date }}</td>
-                                        <td>{{ $tran->check_out_date }}</td>
-                                        <td>{{ $tran->status }}</td>
+                                        <td>{{ $tran->transaction_id }}</td>
+                                        {{-- //tranactions status with badge  --}}
+                                        @if ($tran->transaction_status == 0)
+                                            <td><span class="badge bg-success">Onaylandi</span></td>
+                                        @elseif($tran->transaction_status == 2)
+                                            <td><span class="badge bg-warning">Onay Bekliyor</span></td>
+                                            @elseif($tran->transaction_status == 1)
+                                            <td><span class="badge bg-danger">Iptal Edildi</span></td>
+                                        @endif
                                     </tr>
                                 @endforeach
                                 {{-- <tr>

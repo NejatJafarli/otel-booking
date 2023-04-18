@@ -47,7 +47,7 @@
             </div>
         </div>
         <div class="d-flex justify-content-center">
-            <div class="col-9">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-body">
 
@@ -149,7 +149,6 @@
                                         <th class="pt-0">Oda Fiyati</th>
                                         <th class="pt-0">Oda Durumu</th>
                                         <th class="pt-0">In / Out Date</th>
-                                        <th class="pt-0">Transaction Id</th>
                                         <th colspan="2" class="pt-0">Kiralayan Kullanici</th>
                                     </tr>
                                 </thead>
@@ -182,11 +181,9 @@
                                             @endphp
                                             @if ($transaction)
                                                 <td>{{ $in_date }} To {{ $out_date }}</td>
-                                                <td>{{ $transaction->transaction_id }}</td>
                                                 <td>{{ $user->username }}</td>
                                                 <td></td>
                                             @else
-                                                <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>

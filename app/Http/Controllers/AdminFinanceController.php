@@ -54,11 +54,11 @@ class AdminFinanceController extends Controller
         return array($minDate, $maxDate);
     }
 
-    private function moneyturk($amount)
+    private function moneyAmerican($amount)
 {
     $regex = $amount / 100;
     $usd = number_format($regex, 2, '.', ',');
-    return $usd . '₺';
+    return $usd . '$';
 }
 
     public function raporlar(){
@@ -67,19 +67,32 @@ class AdminFinanceController extends Controller
         //get transactions where status is 0
         //-7 days from now
         $data_7 = transaction::where('transaction_status',0)->where('created_at','>=',date('Y-m-d H:i:s', strtotime('-7 days')));
-        $data_7_sum=$this->moneyturk($data_7->sum('transaction_amount'));
+        $data_7_sum=$this->moneyAmerican($data_7->sum('transaction_amount'));
         //group by date and show sum of transaction_amount and count of transaction_id
-        $data_7 = $data_7->selectRaw('DATE(created_at) as date, sum(transaction_amount) as total, count(*) as count')->groupBy('date')->get();
+        $data_7 = $data_7->selectRaw('DATE(created_at) as date, sum(transaction_amount) as amount, count(*) as count')->groupBy('date')->get();
+
+        $arr=$this->GetCurrentMonthMaxMinDays();
+        $startDate = $arr[0];
+        $endDate = $arr[1];
+
+        
+        //get transactions where status is 0 and transaction_date is between startDate and endDate
+        $data_30 = transaction::where('transaction_status',0)->where('created_at','>=',$startDate)->where('created_at','<=',$endDate);
+        $data_30_sum=$this->moneyAmerican($data_30->sum('transaction_amount'));
+        //group by date and show sum of transaction_amount and count of transaction_id
+        $data_30 = $data_30->selectRaw('DATE(created_at) as date, sum(transaction_amount) as amount, count(*) as count')->groupBy('date')->get();
 
         $arr=$this->GetCurrentMonthMaxMinDays(true);
         $startDate = $arr[0];
         $endDate = $arr[1];
 
-        //get transactions where status is 0 and transaction_date is between startDate and endDate
-        $data_30 = transaction::where('transaction_status',0)->where('created_at','>=',$startDate)->where('created_at','<=',$endDate);
-        $data_30_sum=$this->moneyturk($data_30->sum('transaction_amount'));
-        //group by date and show sum of transaction_amount and count of transaction_id
-        $data_30 = $data_30->selectRaw('DATE(created_at) as date, sum(transaction_amount) as total, count(*) as count')->groupBy('date')->get();
-        return view('Admin/Finance/raporlar',['data_7' => $data_7, 'data_30' => $data_30, 'data_7_sum' => $data_7_sum, 'data_30_sum' => $data_30_sum]);
+        $data_60=transaction::where('transaction_status',0)->where('created_at','>=',$startDate)->where('created_at','<=',$endDate);
+        $data_60_sum=$this->moneyAmerican($data_60->sum('transaction_amount'));
+
+        $data_60 = $data_60->selectRaw('DATE(created_at) as date, sum(transaction_amount) as amount, count(*) as count')->groupBy('date')->get();
+        
+
+        
+        return view('Admin/Finance/raporlar',['data_7' => $data_7, 'data_30' => $data_30, 'data_7_sum' => $data_7_sum, 'data_30_sum' => $data_30_sum, 'data_60' => $data_60, 'data_60_sum' => $data_60_sum]);
     }
 }

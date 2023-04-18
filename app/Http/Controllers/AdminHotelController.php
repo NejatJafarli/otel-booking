@@ -49,5 +49,40 @@ class AdminHotelController extends Controller
             ],200);
         }
     }
+    public function editHotel(Request $request){
+        //hotel_id hotelname hoteladdress
+        $request->validate([
+            'hotel_id'=>'required | integer',
+            'hotelname'=>'required | max:255 | min:3',
+            'hoteladdress'=>'required | max:255 | min:3'
+        ],[
+            'hotel_id.required'=>'Otel id boş bırakılamaz!',
+            'hotel_id.integer'=>'Otel id sayısal olmalıdır!',
+            'hotelname.required'=>'Otel adı boş bırakılamaz!',
+            'hotelname.max'=>'Otel adı en fazla 255 karakter olabilir!',
+            'hotelname.min'=>'Otel adı en az 3 karakter olabilir!',
+            'hoteladdress.required'=>'Otel adresi boş bırakılamaz!',
+            'hoteladdress.max'=>'Otel adresi en fazla 255 karakter olabilir!',
+            'hoteladdress.min'=>'Otel adresi en az 3 karakter olabilir!',
+        ]);
+
+        $hotel=Hotel::find($request->hotel_id);
+        if($hotel){
+            $hotel->name=$request->hotelname;
+            $hotel->address=$request->hoteladdress;
+            $hotel->save();
+            return response()->json([
+                "status"=>true,
+                "message"=>"Otel başarıyla güncellendi!"
+            ],200);
+        }
+        else{
+            return response()->json([
+                "status"=>false,
+                "message"=>"Otel bulunamadı!"
+            ],200);
+        }
+         
+    }
 
 }
