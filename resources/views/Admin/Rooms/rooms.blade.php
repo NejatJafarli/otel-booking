@@ -4,6 +4,10 @@
     use App\Models\transaction;
     use App\Models\User;
 @endphp
+
+@section('header')
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+@endsection
 @section('content')
     <div class="row flex-grow-1">
         <div class="col-md-6 grid-margin stretch-card">
@@ -98,7 +102,7 @@
                                                     @csrf
                                                     <div class="mb-3">
                                                         <label for="room_number" class="form-label">Oda Numarasi</label>
-                                                        <input type="text" class="form-control" id="room_number"
+                                                        <input type="number" class="form-control" id="room_number"
                                                             name="room_number" value="{{ old('room_number') }}">
                                                     </div>
                                                     <div class="mb-3">
@@ -140,7 +144,7 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table  id="MyDataTable" class="table table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th class="pt-0">#</th>
@@ -149,7 +153,8 @@
                                         <th class="pt-0">Oda Fiyati</th>
                                         <th class="pt-0">Oda Durumu</th>
                                         <th class="pt-0">In / Out Date</th>
-                                        <th colspan="2" class="pt-0">Kiralayan Kullanici</th>
+                                        <th class="pt-0">Kiralayan Kullanici</th>
+                                        <th class="pt-0"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -182,9 +187,7 @@
                                             @if ($transaction)
                                                 <td>{{ $in_date }} To {{ $out_date }}</td>
                                                 <td>{{ $user->username }}</td>
-                                                <td></td>
                                             @else
-                                                <td></td>
                                                 <td></td>
                                                 <td></td>
                                             @endif
@@ -206,10 +209,6 @@
                                     @endforeach
                                 </tbody>
                             </table>
-
-                            <div class="d-flex justify-content-center pt-4">
-                                {{ $rooms->onEachSide(2)->links() }}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -376,3 +375,46 @@
         }
     </script>
 @endsection
+
+@section('js')
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        // npm package: datatables.net-bs5
+        // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+        // npm package: datatables.net-bs5
+        // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+
+        $(function() {
+            'use strict';
+
+            $(function() {
+                $('#MyDataTable').DataTable({
+                    "aLengthMenu": [
+                        [10, 30, 50, -1],
+                        [10, 30, 50, "All"]
+                    ],
+                    "iDisplayLength": 10,
+                    "language": {
+                        search: ""
+                    }
+                });
+                $('#MyDataTable').each(function() {
+                    var datatable = $(this);
+                    // SEARCH - Add the placeholder for Search and Turn this into in-line form control
+                    var search_input = datatable.closest('.dataTables_wrapper').find(
+                        'div[id$=_filter] input');
+                    search_input.attr('placeholder', 'Search');
+                    search_input.removeClass('form-control-sm');
+                    // LENGTH - Inline-Form control
+                    var length_sel = datatable.closest('.dataTables_wrapper').find(
+                        'div[id$=_length] select');
+                    length_sel.removeClass('form-control-sm');
+                });
+            });
+
+        });
+    </script>
+@endsection
+

@@ -101,7 +101,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         //route admin/users
         Route::get('', [AdminUserController::class, 'users'])->name('users');
         // //route admin/users/create
-        Route::post('/create', [AdminUserController::class, 'createUser'])->name('CreateUser');
+        Route::post('/create', [AdminUserController::class, 'createUser'])->name('createUser');
         // //route admin/users/store
         // Route::post('/store', [AdminUserController::class, 'storeUser'])->name('StoreUser');
         // //route admin/users/edit/{id}
