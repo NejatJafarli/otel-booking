@@ -20,13 +20,14 @@ class AdminHotelController extends Controller
         //hotelname and address validation
         $request->validate([
             'hotelname'=>'required | max:255 | min:3 | unique:hotels,name',
-            'hoteladdress'=>'required | max:255 | min:3'
+            'hoteladdress'=>'required | max:255 | min:3',
         ]);
 
         //create hotel
         $hotel=Hotel::create([
             'name'=>$request->hotelname,
-            'address'=>$request->hoteladdress
+            'address'=>$request->hoteladdress,
+            'price'=>$request->hotelprice
         ]);
 
         //return response
@@ -54,7 +55,8 @@ class AdminHotelController extends Controller
         $request->validate([
             'hotel_id'=>'required | integer',
             'hotelname'=>'required | max:255 | min:3',
-            'hoteladdress'=>'required | max:255 | min:3'
+            'hoteladdress'=>'required | max:255 | min:3',
+            'hotelprice'=>'required'
         ],[
             'hotel_id.required'=>'Otel id boş bırakılamaz!',
             'hotel_id.integer'=>'Otel id sayısal olmalıdır!',
@@ -64,12 +66,14 @@ class AdminHotelController extends Controller
             'hoteladdress.required'=>'Otel adresi boş bırakılamaz!',
             'hoteladdress.max'=>'Otel adresi en fazla 255 karakter olabilir!',
             'hoteladdress.min'=>'Otel adresi en az 3 karakter olabilir!',
+            'hotelprice.required'=>'Otel fiyatı boş bırakılamaz!'
         ]);
 
         $hotel=Hotel::find($request->hotel_id);
         if($hotel){
             $hotel->name=$request->hotelname;
             $hotel->address=$request->hoteladdress;
+            $hotel->price=$request->hotelprice;
             $hotel->save();
             return response()->json([
                 "status"=>true,

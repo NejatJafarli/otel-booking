@@ -16,11 +16,13 @@ class CreateTransactionsTable extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             //room_id wallet_id transaction_type transaction_amount transaction_status
-            $table->unsignedBigInteger('room_id');
+            $table->unsignedBigInteger('room_id')->nullable();
+            //add hotel_id
+            $table->unsignedBigInteger('hotel_id')->nullable();
             $table->string('wallet_id');
             //start date, end date, duration
-            $table->timestamps('check_in_date');
-            $table->timestamps('check_out_date');
+            $table->datetime('check_in_date')->nullable();
+            $table->datetime('check_out_date')->nullable();
             //transaction_id\
             $table->string('transaction_id');
             
@@ -32,6 +34,7 @@ class CreateTransactionsTable extends Migration
 
 
             $table->foreign('room_id')->references('id')->on('rooms');
+            $table->foreign('hotel_id')->references('id')->on('hotels');
             $table->timestamps();
         });
     }

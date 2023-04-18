@@ -39,76 +39,76 @@ Route::get('admin', function () {
 
 //route admin/login
 Route::get('/admin/login', [AdminAuthController::class, 'login'])->name('adminLogin');
+
 Route::post('/admin/login', [AdminAuthController::class, 'postLogin'])->name('adminLoginPost');
 
 //create middleware adminAuthenticated route group for admin
 Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
-    //route admin/dashboard
+
+    //admin list
+    Route::get('/admins', [AdminAuthController::class, 'admins'])->name('admins');
+    //admin register
+    Route::post('/register', [AdminAuthController::class, 'adminRegister'])->name('adminRegister');
+    //admin delete
+    Route::get('/delete/{id}', [AdminAuthController::class, 'deleteAdmin'])->name('deleteAdmin');
+    //admin edit
+    // Route::post('/edit', [AdminAuthController::class, 'editAdmin'])->name('editAdmin');
+
+
     Route::get('/dashboard', [AdminMainController::class, 'dashboard'])->name('adminDashboard');
-    //route admin/logout
+    
     Route::get('/logout', [AdminAuthController::class, 'logout'])->name('adminLogout');
     
     Route::group(['prefix' => 'room_types'],function () {
-
+        
         Route::get('', [AdminRoomController::class, 'roomTypes'])->name('roomTypes');
-        // //route admin/rooms/create
+        
         Route::post('/create', [AdminRoomController::class, 'createRoomType'])->name('createRoomType');
-
-        //delete room
+        
         Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoomType'])->name('deleteRoomType');
-        // //route admin/rooms/store
+        
         Route::post('/edit', [AdminRoomController::class, 'editRoomType'])->name('editRoomType');
+        
     });
 
     Route::group(['prefix' => 'finance'],function () {
 
         Route::get('', [AdminFinanceController::class, 'raporlar'])->name('raporlar');
+        
         Route::post('/getDatas', [AdminFinanceController::class, 'datebydateReports'])->name('datebydateReports');
        
     });
 
     //route group Rooms
     Route::group(['prefix' => 'rooms'], function () {
-        //route admin/rooms
+        
         Route::get('', [AdminRoomController::class, 'rooms'])->name('rooms');
-        // //route admin/rooms/create
+        
         Route::post('/create', [AdminRoomController::class, 'createRoom'])->name('CreateRoom');
-
-        //delete room
+        
         Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoom'])->name('DeleteRoom');
-        // //route admin/rooms/store
+        
         Route::post('/edit', [AdminRoomController::class, 'editRoom'])->name('editRoom');
-        // //route admin/rooms/edit/{id}
-        // Route::get('/edit/{id}', [AdminRoomController::class, 'editRoom'])->name('EditRoom');
-        // //route admin/rooms/update/{id}
-        // Route::post('/update/{id}', [AdminRoomController::class, 'updateRoom'])->name('UpdateRoom');
-        // //route admin/rooms/delete/{id}
-        // Route::get('/delete/{id}', [AdminRoomController::class, 'deleteRoom'])->name('DeleteRoom');
     });
     Route::group(['prefix' => 'hotels'], function () {
-        //route admin/hotels
+       
         Route::get('', [AdminHotelController::class, 'hotels'])->name('hotels');
-        // //route admin/hotels/create
+        
         Route::post('/create', [AdminHotelController::class, 'createHotel'])->name('createHotel');
-
-        //delete hotel
+        
         Route::get('/delete/{id}', [AdminHotelController::class, 'deleteHotel'])->name('deleteHotel');
+        
         Route::get('/edit', [AdminHotelController::class, 'editHotel'])->name('editHotel');
-    
-
     });
     //route prefix user
     Route::group(['prefix' => 'users'], function () {
-        //route admin/users
         Route::get('', [AdminUserController::class, 'users'])->name('users');
-        // //route admin/users/create
+
         Route::post('/create', [AdminUserController::class, 'createUser'])->name('createUser');
 
         Route::get('/delete/{id}', [AdminUserController::class, 'deleteUser'])->name('deleteUser');
 
         Route::post('/edit', [AdminUserController::class, 'editUser'])->name('editUser');
-
-        
     });
 
     Route::group(['prefix' => 'trans'], function () {

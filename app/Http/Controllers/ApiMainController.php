@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BuyOptions;
 use App\Models\room;
+use App\Models\Hotel;
 use App\Models\room_types;
 use App\Models\transaction;
 use App\Models\User;
@@ -97,8 +98,10 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Satin Alma Tipi bulunamadı!']);
         }
         //check in date and check out date
-        $check_in_date = date('Y-m-d');
-        $check_out_date = date('Y-m-d', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
+
+        //get check in date datetime
+        $check_in_date_time = date('Y-m-d H:i:s');
+        $check_out_date = date('Y-m-d H:i:s', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
         //check if user exists
         $user = User::where('wallet_id', $request->wallet_id)->first();
         if (!$user) {
@@ -165,8 +168,6 @@ class ApiMainController extends Controller
         if (!$transaction) {
             return response()->json(['status' => false, 'message' => 'İşlem bulunamadı!']);
         }
-
-      
 
         if($transaction->transaction_status==2){
 
@@ -309,6 +310,93 @@ class ApiMainController extends Controller
             }
         }else{
             return response()->json(['status' => false, 'message' => 'Oda için rezervasyon tarihi geçmiş!']);
+        }
+    }
+
+    public function enterHotelRequest(Request $req){
+        // 'wallet_id' => 'required', and hotel id
+        $req->validate(
+            [
+                'wallet_id' => 'required|string',
+                'hotel_id' => 'required|integer',
+            ],
+            [
+                'wallet_id.required' => 'Cüzdan ID boş olamaz!',
+                'wallet_id.string' => 'Cüzdan ID sadece harflerden oluşmalı!',
+                'hotel_id.required' => 'Otel ID boş olamaz!',
+                'hotel_id.integer' => 'Otel ID sadece sayılardan oluşmalı!',
+            ]
+        );
+
+        //find hotel
+        $hotel = Hotel::find($req->hotel_id);
+
+        if(!$hotel){
+            return response()->json(['status' => false, 'message' => 'Otel bulunamadı!']);
+        }
+
+        //check if hotel is have price
+        if($hotel->price == null){
+            return response()->json(['status' => false, 'message' => 'Otel için fiyat belirlenmemiş!']);
+        }
+
+        $guid=$this->generateGuid();
+
+        //create transaction
+        transaction::create([
+            'wallet_id' => $req->wallet_id,
+            'hotel_id' => $req->hotel_id,
+            'transaction_id' => $guid,
+            'transaction_status' => 2,
+            'transaction_amount' => $hotel->price,
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Otel için Giriş İsteği başarıyla oluşturuldu!']);
+    }
+
+    public function enterHotelConfirm(Request $req){
+        // transaction id // status 0 or 1
+        $req->validate(
+            [
+                'transaction_id' => 'required|string',
+                'transaction.status' => 'required|integer',
+            ],
+            [
+                'transaction_id.required' => 'İşlem ID boş olamaz!',
+                'transaction_id.string' => 'İşlem ID sadece harflerden oluşmalı!',
+                'transaction.status.required' => 'Durum boş olamaz!',
+                'transaction.status.integer' => 'Durum sadece sayılardan oluşmalı!',
+            ]
+        );
+
+        //find transaction
+        $transaction = transaction::where('transaction_id',$req->transaction_id)->first();
+
+        if(!$transaction){
+            return response()->json(['status' => false, 'message' => 'İşlem bulunamadı!']);
+        }
+
+        //check if transaction is hotel transaction
+        if($transaction->hotel_id == null){
+            return response()->json(['status' => false, 'message' => 'İşlem otel işlemi değil!']);
+        }
+
+        //check if transaction is confirmed
+        if($transaction->transaction_status != 2){
+            return response()->json(['status' => false, 'message' => 'İşlem Beklemede değil!']);
+        }
+
+        //check if transaction is confirmed
+        if($req->transaction_status == 0){
+            $transaction->transaction_status = 0;
+            $transaction->save();
+            return response()->json(['status' => true, 'message' => 'İşlem onaylandı!']);
+        }else if ($req->transaction_status == 1){
+            $transaction->transaction_status = 1;
+            $transaction->save();
+            return response()->json(['status' => true, 'message' => 'İşlem reddedildi!']);
+        }else{
+            return response()->json(['status' => false, 'message' => 'Durum 0 veya 1 olmalı!']);
         }
     }
 }

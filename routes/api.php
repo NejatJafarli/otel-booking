@@ -37,6 +37,9 @@ Route::post('user/buyRoomRequest', [ApiMainController::class, 'buyRoomRequest'])
 Route::post('user/buyRoomConfirm', [ApiMainController::class, 'buyRoomConfirm']);
 Route::post('user/setRoomPassword', [ApiMainController::class, 'setRoomPassword']);
 
+Route::post('user/enterHotelRequest', [ApiMainController::class, 'enterHotelRequest']);
+Route::post('user/enterHotelConfirm', [ApiMainController::class, 'enterHotelConfirm']);
+
 //enter room
 Route::post('enterRoom', [ApiMainController::class, 'enterRoom']);
 Route::post('getBookedRooms', [ApiMainController::class, 'getBookedRooms']);

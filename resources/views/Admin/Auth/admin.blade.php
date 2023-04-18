@@ -9,12 +9,12 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <h6 class="card-title mb-0">Toplam Kullanici Sayisi</h6>
+                        <h6 class="card-title mb-0">Toplam Admin Sayisi</h6>
                     </div>
                     <div class="row">
                         <div class="col-6 col-md-12 col-xl-5">
                             <h3 class="mb-2"></h3>
-                            <h3 class="mb-2">{{ $user_count }}</h3>
+                            <h3 class="mb-2">{{ $admin_count }}</h3>
                             <div class="d-flex align-items-baseline">
                             </div>
                         </div>
@@ -53,7 +53,7 @@
 
                     <div class="row">
                         <div class="col-11">
-                            <h6 class="card-title mb-0">Kullanicilar</h6>
+                            <h6 class="card-title mb-0">Adminler</h6>
                         </div>
                         <div class="col-1">
                             {{-- //+ butonu ile odalar eklenecek  MODAL ACILACAK --}}
@@ -67,28 +67,27 @@
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Oda Ekle</h5>
+                                            <h5 class="modal-title" id="exampleModalLabel">Admin Ekle</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>
-                                        <form action="{{ route('createUser') }}" method="POST">
+                                        <form action="{{ route('adminRegister') }}" method="POST">
                                             <div class="modal-body">
                                                 @csrf
                                                 <div class="mb-3">
-                                                    <label for="username" class="form-label">Kullanici username</label>
-                                                    <input type="text" class="form-control" id="username"
-                                                        name="username" value="{{ old('username') }}">
-                                                    <label for="email" class="form-label">Kullanici Email (not
+                                                    <label for="adminusername" class="form-label">Admin username</label>
+                                                    <input type="text" class="form-control" id="adminusername"
+                                                        name="adminusername" value="{{ old('adminusername') }}">
+                                                    <label for="adminemail" class="form-label">Admin Email (not
                                                         required)</label>
-                                                    <input type="email" class="form-control" id="email" name="email"
-                                                        value="{{ old('email') }}">
-                                                    <label for="email" class="form-label">Kullanici Wallet Id</label>
-                                                    <input type="text" class="form-control" id="wallet_id"
-                                                        name="wallet_id" value="{{ old('wallet_id') }}">
-                                                    <label for="email" class="form-label">Kullanici Karakter
-                                                        Secimi</label>
-                                                    <input type="number" class="form-control" id="char_number"
-                                                        name="char_number" value="{{ old('char_number') }}">
+                                                    <input type="email" class="form-control" id="adminemail" name="adminemail"
+                                                        value="{{ old('adminemail') }}">
+                                                    <label for="email" class="form-label">Admin Role</label>
+                                                    <input type="text" class="form-control" id="adminrole"
+                                                        name="adminrole" value="{{ old('adminrole') }}">
+                                                    <label for="password" class="form-label">Password</label>
+                                                    <input type="password" class="form-control" id="adminpassword"
+                                                        name="adminpassword" value="{{ old('adminpassword') }}">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -107,32 +106,22 @@
                             <thead>
                                 <tr>
                                     <th class="pt-0">#</th>
-                                    <th class="pt-0">Kullanici Adi</th>
-                                    <th class="pt-0">Wallet Id</th>
-                                    <th class="pt-0">Kullanici Emaili</th>
-                                    <th class="pt-0">Kullanici Kayit Tarihi</th>
+                                    <th class="pt-0">Admin Username</th>
+                                    <th class="pt-0">Admin Email</th>
+                                    <th class="pt-0">Admin Role</th>
                                     <th class="pt-0">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
 
-                                @foreach ($users as $user)
+                                @foreach ($admins as $admin)
                                     <tr>
-                                        <td>{{ $user->id }}</td>
-                                        <td>{{ $user->username }}</td>
-                                        <td>{{ $user->wallet_id }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ $user->created_at }}</td>
+                                        <td>{{ $admin->id }}</td>
+                                        <td>{{ $admin->username }}</td>
+                                        <td>{{ $admin->email }}</td>
+                                        <td>{{ $admin->role }}</td>
                                         <td class="text-right">
-                                            <button
-                                                onclick="editUser(
-                                                    { id:{{ $user->id }},username:'{{$user->username}}',wallet_id:'{{ $user->wallet_id }}',email:'{{ $user->email }}',char_number:'{{ $user->character_number }}' })"
-                                                type="button" class="btn btn-xs btn-primary btn-icon"
-                                                data-bs-toggle="modal" data-bs-target="#exampleModal2">
-                                                <i class="link-icon" data-feather="edit"></i>
-                                            </button>
-
-                                            <button onclick="deleteUser({{ $user->id }})" type="button"
+                                            <button onclick="deleteAdmin({{ $admin->id }})" type="button"
                                                 class="btn btn-xs btn-danger btn-icon">
                                                 <i class="link-icon" data-feather="trash-2"></i>
                                             </button>
@@ -147,45 +136,9 @@
         </div>
 
         
-    {{-- edit modal --}}
-    <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Kullaniciyi Duzenle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                {{-- action="{{ route('createRoomType') }}" method="POST" --}}
-                <form>
-                    <input type="hidden" id="edit_id">
-                    <div class="modal-body">
-                        @csrf
-                        <label for="username" class="form-label">Kullanici username</label>
-                        <input type="text" class="form-control" id="edit_username"
-                            name="username" value="{{ old('username') }}">
-                        <label for="email" class="form-label">Kullanici Email (not
-                            required)</label>
-                        <input type="email" class="form-control" id="edit_email" name="email"
-                            value="{{ old('email') }}">
-                        <label for="email" class="form-label">Kullanici Wallet Id</label>
-                        <input type="text" class="form-control" id="edit_wallet_id"
-                            name="wallet_id" value="{{ old('wallet_id') }}">
-                        <label for="email" class="form-label">Kullanici Karakter
-                            Secimi</label>
-                        <input type="number" class="form-control" id="edit_char_number"
-                            name="char_number" value="{{ old('char_number') }}">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button onclick="ConfirmEdit()" type="button" class="btn btn-primary">Kaydet</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     </div>
         <script>
-            function deleteUser(id) {
+            function deleteAdmin(id) {
             //swal ile silme onayi
             swal.fire({
                 title: 'Emin misiniz?',
@@ -203,7 +156,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     //ajax ile silme islemi
-                    let url = "{{ route('deleteUser', -1) }}";
+                    let url = "{{ route('deleteAdmin', -1) }}";
                     $.ajax({
                         type: "GET",
                         url: url.replace('-1', id),
@@ -212,7 +165,7 @@
                             if (response.status) {
                                 Swal.fire(
                                     'Silindi!',
-                                    'Kullanici basariyla silindi.',
+                                    'Admin basariyla silindi.',
                                     'success'
                                 ).then((result) => {
                                     if (result.isConfirmed) {
@@ -233,86 +186,86 @@
 
         }
 
-        function editUser(json) {
+        // function editUser(json) {
 
-            //get element by id edit_id
-            let id = document.getElementById('edit_id');
-            //set value
-            id.value = json.id;
+        //     //get element by id edit_id
+        //     let id = document.getElementById('edit_id');
+        //     //set value
+        //     id.value = json.id;
           
-            //get element by id edit_username
-            let user= document.getElementById('edit_username');
-            //set value
-            user.value = json.username;
+        //     //get element by id edit_username
+        //     let user= document.getElementById('edit_username');
+        //     //set value
+        //     user.value = json.username;
 
-            let email = document.getElementById('edit_email');
-            email.value = json.email;
+        //     let email = document.getElementById('edit_email');
+        //     email.value = json.email;
 
-            let wallet_id = document.getElementById('edit_wallet_id');
-            wallet_id.value = json.wallet_id;
+        //     let wallet_id = document.getElementById('edit_wallet_id');
+        //     wallet_id.value = json.wallet_id;
 
-            console.log(json);
-            let char_number = document.getElementById('edit_char_number');
-            char_number.value = json.char_number;
+        //     console.log(json);
+        //     let char_number = document.getElementById('edit_char_number');
+        //     char_number.value = json.char_number;
           
-        }
+        // }
 
-        function ConfirmEdit() {
-            //swal ile silme onayi
-            swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu islem geri alinamaz!",
-                icon: 'warning',
-                //change content color
-                customClass: {
-                    content: 'text-dark'
-                },
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Evet, degistir!',
-                cancelButtonText: 'Hayir, iptal et!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    //ajax ile silme islemi
-                    let data = {
-                        _token: "{{ csrf_token() }}",
-                        id: $('#edit_id').val(),
-                        username: $('#edit_username').val(),
-                        wallet_id: $('#edit_wallet_id').val(),
-                        email: $('#edit_email').val(),
-                        char_number: $('#edit_char_number').val(),
-                    }
-                    console.log(data);
-                    $.ajax({
-                        type: "POST",
-                        data: data,
-                        url: "{{ route('editUser') }}",
-                        success: function(response) {
-                            console.log(response);
-                            if (response.status) {
-                                Swal.fire(
-                                    'Degistirildi!',
-                                    'Kullanici basariyla degistirildi.',
-                                    'success'
-                                ).then((result) => {
-                                    if (result.isConfirmed) {
-                                        location.reload();
-                                    }
-                                })
-                            } else {
-                                Swal.fire(
-                                    'Hata!',
-                                    'Kullanici degistirilemedi.',
-                                    'error'
-                                )
-                            }
-                        }
-                    });
-                }
-            })
+        // function ConfirmEdit() {
+        //     //swal ile silme onayi
+        //     swal.fire({
+        //         title: 'Emin misiniz?',
+        //         text: "Bu islem geri alinamaz!",
+        //         icon: 'warning',
+        //         //change content color
+        //         customClass: {
+        //             content: 'text-dark'
+        //         },
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Evet, degistir!',
+        //         cancelButtonText: 'Hayir, iptal et!'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             //ajax ile silme islemi
+        //             let data = {
+        //                 _token: "{{ csrf_token() }}",
+        //                 id: $('#edit_id').val(),
+        //                 username: $('#edit_username').val(),
+        //                 wallet_id: $('#edit_wallet_id').val(),
+        //                 email: $('#edit_email').val(),
+        //                 char_number: $('#edit_char_number').val(),
+        //             }
+        //             console.log(data);
+        //             $.ajax({
+        //                 type: "POST",
+        //                 data: data,
+        //                 url: "{{ route('editUser') }}",
+        //                 success: function(response) {
+        //                     console.log(response);
+        //                     if (response.status) {
+        //                         Swal.fire(
+        //                             'Degistirildi!',
+        //                             'Kullanici basariyla degistirildi.',
+        //                             'success'
+        //                         ).then((result) => {
+        //                             if (result.isConfirmed) {
+        //                                 location.reload();
+        //                             }
+        //                         })
+        //                     } else {
+        //                         Swal.fire(
+        //                             'Hata!',
+        //                             'Kullanici degistirilemedi.',
+        //                             'error'
+        //                         )
+        //                     }
+        //                 }
+        //             });
+        //         }
+        //     })
 
-        }
+        // }
         </script>
     @endsection
     @section('js')
