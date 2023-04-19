@@ -21,7 +21,8 @@ class transaction extends Model
         "transaction_status",
         "transaction_id",
         "status",
-        "room_password"
+        "room_password",
+        "hotel_id"
     ];
 
 
@@ -30,5 +31,12 @@ class transaction extends Model
     {
         return $this->belongsTo(room::class);
     }
+
+   //hotel
+    public function hotel()
+    {
+        return $this->belongsTo(Hotel::class);
+    }
+
     
 }

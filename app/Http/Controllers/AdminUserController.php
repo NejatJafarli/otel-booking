@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -123,5 +124,15 @@ class AdminUserController extends Controller
             "status" => true,
             "message" => "Kullanici başarıyla güncellendi!"
         ], 200);
+    }
+
+    public function userDetail($id){
+        $user = User::find($id);
+
+        //get user transactions
+        $userRoomTrans=transaction::where("wallet_id", $user->wallet_id)->where("hotel_id",null)->get();
+        $userHotelTrans=transaction::where("wallet_id", $user->wallet_id)->where("room_id",null)->get();
+
+        return view('Admin/Users/user_detail',['user' => $user, 'userRoomTrans' => $userRoomTrans, 'userHotelTrans' => $userHotelTrans]);
     }
 }

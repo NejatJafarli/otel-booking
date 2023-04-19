@@ -102,6 +102,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
     });
     //route prefix user
     Route::group(['prefix' => 'users'], function () {
+        Route::get('/{id}', [AdminUserController::class, 'userDetail'])->name('userDetail');
         Route::get('', [AdminUserController::class, 'users'])->name('users');
 
         Route::post('/create', [AdminUserController::class, 'createUser'])->name('createUser');

@@ -119,7 +119,7 @@
                                 @foreach ($users as $user)
                                     <tr>
                                         <td>{{ $user->id }}</td>
-                                        <td>{{ $user->username }}</td>
+                                        <td><a href={{route("userDetail",$user->id)}}>{{ $user->username }}</a></td>
                                         <td>{{ $user->wallet_id }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{ $user->created_at }}</td>
