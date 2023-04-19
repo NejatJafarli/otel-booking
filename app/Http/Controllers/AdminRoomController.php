@@ -13,25 +13,58 @@ class AdminRoomController extends Controller
     // rooms
     public function rooms()
     {
+        $hotel_id = request()->query('hotel_id');
+
         //get all rooms with pagination
-        $rooms = room::orderBy('id', 'desc')->paginate(10);
+        $rooms = room::orderBy('id', 'desc')->get();
 
         //get count of all rooms
         $rooms_count = room::count();
         //get count of all rooms with status 1
         $rooms_count_1 = room::where('room_status', 1)->count();
-
-        $types = room_types::all();
-
-        //merge room types
-        foreach ($rooms as $room) {
-            $room->room_type = $room->room_type()->first();
+        $types;
+        if ($hotel_id != null && $hotel_id != "-1") {
+            $types = room_types::where('hotel_id', $hotel_id)->get();
+        } else {
+            $types = room_types::all();
         }
-        return view('Admin/Rooms/rooms', ['rooms' => $rooms, 'types' => $types, 'rooms_count' => $rooms_count, 'rooms_count_1' => $rooms_count_1]);
+
+
+         //remove from array which $room->room_type->hotel_id != $hotel_id
+         if ($hotel_id != null && $hotel_id != "-1") {
+            foreach ($rooms as $room) {
+                $room->room_type = $room->room_type()->first();
+                if($room->room_type->hotel_id!=$hotel_id){
+                    //remove from array
+                    $rooms=$rooms->except($room->id);
+                }
+            }
+         }else{
+             //merge room types
+            foreach ($rooms as $room) {
+                $room->room_type = $room->room_type()->first();
+            }
+        }
+                
+       
+         //get all hotels
+         $hotels = Hotel::all();
+        return view('Admin/Rooms/rooms', ['hotels'=>$hotels,'rooms' => $rooms, 'types' => $types, 'rooms_count' => $rooms_count, 'rooms_count_1' => $rooms_count_1]);
     }
 
     public function roomTypes(){
-        $types = room_types::orderBy('id', 'desc')->get();
+
+
+        //get hotel-id from query string
+        $hotel_id = request()->query('hotel_id');
+        
+        $types = room_types::orderBy('id', 'desc');
+        
+        if($hotel_id!=null &&$hotel_id!="-1" ){
+            $types=$types->where('hotel_id',$hotel_id);
+        }
+
+        $types=$types->get();
         $room_type_count = room_types::count();
 
 

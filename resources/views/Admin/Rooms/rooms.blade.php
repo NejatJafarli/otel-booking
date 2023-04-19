@@ -50,6 +50,21 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-5 pb-3">
+            <div class="card">
+                <div class="card-body">
+                    <form id="selected_hotel_id" action="{{ route('rooms') }}" method="GET">
+                        <select id="select_hotel_id" class="form-select" aria-label="Default select example" name="hotel_id">
+                            <option value="-1" selected>Otel Seciniz</option>
+                            @foreach ($hotels as $hotel)
+                                <option value="{{ $hotel->id }}" {{request()->query('hotel_id')==$hotel->id?"selected":""}}>{{ $hotel->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="d-flex justify-content-center">
             <div class="col-12">
                 <div class="card">
@@ -417,6 +432,11 @@
                 });
             });
 
+        });
+        
+        //$("#selected_hotel_id") onchange submit
+        $("#select_hotel_id").change(function() {
+            $("#selected_hotel_id").submit();
         });
     </script>
 @endsection

@@ -17,7 +17,10 @@ class CreateBuyOptionsTable extends Migration
             $table->id();
             $table->string('option_name')->unique();
             //how many days
+             
             $table->string('option_days');
+             //discount
+             $table->string('discount_percent')->nullable();
             $table->timestamps();
         });
     }

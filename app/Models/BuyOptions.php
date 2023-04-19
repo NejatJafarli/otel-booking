@@ -13,5 +13,6 @@ class BuyOptions extends Model
     protected $fillable = [
         'option_name',
         'option_days',
+        "discount_percent",
     ];
 }

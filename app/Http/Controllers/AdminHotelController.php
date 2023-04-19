@@ -10,7 +10,7 @@ class AdminHotelController extends Controller
     //
     public function hotels(){
 
-        $hotels=Hotel::paginate(10);
+        $hotels=Hotel::all();
         $hotel_count=Hotel::count();
 
         return view('Admin/Hotels/Hotel',['hotels'=>$hotels,'hotel_count'=>$hotel_count]);

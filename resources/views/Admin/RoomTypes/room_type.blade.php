@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 @endsection
 @section('content')
+    {{-- select hotel  --}}
     <div class="row flex-grow-1">
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
@@ -24,12 +25,29 @@
                             </div>
                         </div>
                         <div class="col-6 col-md-12 col-xl-7">
-                            <div id="customersChart" class="mt-md-3 mt-xl-0"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{-- //select hotel --}}
+        <div class="col-5 pb-3">
+            <div class="card">
+                <div class="card-body">
+                    <form id="selected_hotel_id" action="{{ route('roomTypes') }}" method="GET">
+                        <select id="select_hotel_id" class="form-select" aria-label="Default select example" name="hotel_id">
+                            <option value="-1" selected>Otel Seciniz</option>
+                            @foreach ($hotels as $hotel)
+                                <option value="{{ $hotel->id }}" {{request()->query('hotel_id')==$hotel->id?"selected":""}}>{{ $hotel->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
@@ -90,7 +108,8 @@
                                                         name="room_price" value="{{ old('room_price') }}">
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="room_type" class="form-label">Bu Oda Turu Hangi Otele Ait</label>
+                                                    <label for="room_type" class="form-label">Bu Oda Turu Hangi Otele
+                                                        Ait</label>
                                                     {{-- <input type="text" class="form-control" id="room_type"
                                                         name="room_type"> --}}
                                                     {{-- //select ile oda turu secilecek foreach types --}}
@@ -149,7 +168,7 @@
                                         <td class="text-right">
                                             <button
                                                 onclick="editRoomType(
-                                                    { id:{{ $type->id }},hotel_id:{{$type->hotel()->first()->id}},room_type:'{{ $type->room_type }}',room_price:{{ $type->room_price }}})"
+                                                    { id:{{ $type->id }},hotel_id:{{ $type->hotel()->first()->id }},room_type:'{{ $type->room_type }}',room_price:{{ $type->room_price }}})"
                                                 type="button" class="btn btn-xs btn-primary btn-icon"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                 <i class="link-icon" data-feather="edit"></i>
@@ -164,10 +183,10 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     {{-- edit modal --}}
@@ -199,14 +218,13 @@
                             {{-- //select ile oda turu secilecek foreach types --}}
                             <select class="form-select" aria-label="Default select example" id="edit_hotel_id">
                                 @foreach ($hotels as $hotel)
-                                    <option value="{{ $hotel->id }}"
-                                        @if ($selected == $hotel->id) selected @endif>
+                                    <option value="{{ $hotel->id }}" @if ($selected == $hotel->id) selected @endif>
                                         {{ $hotel->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -344,46 +362,52 @@
     </script>
 @endsection
 @section('js')
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
-        <script>
-            // npm package: datatables.net-bs5
-            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
-            // npm package: datatables.net-bs5
-            // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+    <script>
+        // npm package: datatables.net-bs5
+        // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+        // npm package: datatables.net-bs5
+        // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+
+        $(function() {
+            'use strict';
 
             $(function() {
-                'use strict';
-
-                $(function() {
-                    $('#MyDataTable').DataTable({
-                        "aLengthMenu": [
-                            [10, 30, 50, -1],
-                            [10, 30, 50, "All"]
-                        ],
-                        "iDisplayLength": 10,
-                        "language": {
-                            search: ""
-                        },
-                        "order": [
-                            [0, "desc"]
-                        ]
-                    });
-                    $('#MyDataTable').each(function() {
-                        var datatable = $(this);
-                        // SEARCH - Add the placeholder for Search and Turn this into in-line form control
-                        var search_input = datatable.closest('.dataTables_wrapper').find(
-                            'div[id$=_filter] input');
-                        search_input.attr('placeholder', 'Search');
-                        search_input.removeClass('form-control-sm');
-                        // LENGTH - Inline-Form control
-                        var length_sel = datatable.closest('.dataTables_wrapper').find(
-                            'div[id$=_length] select');
-                        length_sel.removeClass('form-control-sm');
-                    });
+                $('#MyDataTable').DataTable({
+                    "aLengthMenu": [
+                        [10, 30, 50, -1],
+                        [10, 30, 50, "All"]
+                    ],
+                    "iDisplayLength": 10,
+                    "language": {
+                        search: ""
+                    },
+                    "order": [
+                        [0, "desc"]
+                    ]
                 });
-
+                $('#MyDataTable').each(function() {
+                    var datatable = $(this);
+                    // SEARCH - Add the placeholder for Search and Turn this into in-line form control
+                    var search_input = datatable.closest('.dataTables_wrapper').find(
+                        'div[id$=_filter] input');
+                    search_input.attr('placeholder', 'Search');
+                    search_input.removeClass('form-control-sm');
+                    // LENGTH - Inline-Form control
+                    var length_sel = datatable.closest('.dataTables_wrapper').find(
+                        'div[id$=_length] select');
+                    length_sel.removeClass('form-control-sm');
+                });
             });
-        </script>
-    @endsection
+
+        });
+
+
+        //$("#selected_hotel_id") onchange submit
+        $("#select_hotel_id").change(function() {
+            $("#selected_hotel_id").submit();
+        });
+    </script>
+@endsection

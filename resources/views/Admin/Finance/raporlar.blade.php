@@ -6,9 +6,24 @@
 @endphp
 @section('content')
     <div class="row">
+        <div class="col-5 pb-3">
+            <div class="card">
+                <div class="card-body">
+                    <form id="selected_hotel_id" action="{{ route('raporlar') }}" method="GET">
+                        <select id="select_hotel_id" class="form-select" aria-label="Default select example" name="hotel_id">
+                            <option value="-1" selected>Otel Seciniz</option>
+                            @foreach ($hotels as $hotel)
+                                <option value="{{ $hotel->id }}" {{request()->query('hotel_id')==$hotel->id?"selected":""}}>{{ $hotel->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="col-lg-12 col-xl-12 stretch-card">
             <div class="card">
                 <div class="card-body">
+                    
                     <div class="d-flex justify-content-between align-items-baseline mb-2">
                         <h6 class="card-title mb-0">Finans Raporu</h6>
                     </div>
@@ -510,5 +525,14 @@
             }
             window.chart4.render();
         }
+    </script>
+@endsection
+
+@section("js")
+<script>
+       //$("#selected_hotel_id") onchange submit
+       $("#select_hotel_id").change(function() {
+            $("#selected_hotel_id").submit();
+        });
     </script>
 @endsection

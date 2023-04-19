@@ -90,9 +90,9 @@
                                                         name="hotelprice" value="{{ old('hotelprice') }}">
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="day_for_price" class="form-label">Fiyat Karsiligi Otelde Kalinicak Gun sayisi</label>
-                                                    <input type="number" class="form-control" id="day_for_price"
-                                                        name="day_for_price" value="{{ old('day_for_price') }}">
+                                                    <label for="hoteldayforprice" class="form-label">Fiyat Karsiligi Otelde Kalinicak Gun sayisi</label>
+                                                    <input type="number" class="form-control" id="hoteldayforprice"
+                                                        name="hoteldayforprice" value="{{ old('hoteldayforprice') }}">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -128,7 +128,7 @@
                                         <td class="text-right">
                                             <button
                                                 onclick="editHotel(
-                                                    { id:{{ $hotel->id }},hotel_name:'{{$hotel->name}}',hotel_address:'{{ $hotel->address }}',hotel_price:'{{ $hotel->price }}'})"
+                                                    { id:{{ $hotel->id }},hotel_name:'{{$hotel->name}}',day_for_price:'{{ $hotel->day_for_price }}',hotel_price:'{{ $hotel->price }}'})"
                                                 type="button" class="btn btn-xs btn-primary btn-icon"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                 <i class="link-icon" data-feather="edit"></i>
@@ -143,10 +143,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <div class="d-flex justify-content-center pt-4">
-                            {{ $hotels->onEachSide(2)->links() }}
-                        </div>
                     </div>
                 </div>
             </div>

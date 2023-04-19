@@ -127,10 +127,13 @@ class ApiMainController extends Controller
         $amount = $oneDayPrice * $buyOption->option_days;
 
 
-        // //get discount from buy option
-        // $discount = $buyOption->option_discount;
-        // $amount = $amount - ($amount * $discount / 100);
 
+        if($buyOption->discount_percent!=null){
+            $discount = $buyOption->option_discount;
+            //find percent of price
+            $discountAmount = $amount * $discount / 100;
+            $amount = $amount - $discountAmount;
+        }
 
 
         $guid = $this->guidGenerator();
@@ -348,6 +351,10 @@ class ApiMainController extends Controller
 
         $guid=$this->generateGuid();
 
+        $check_in_date_time= Carbon::now();
+        //checkout date add days $hotel->day_for_price
+        $check_out_date_time = Carbon::now()->addDays($hotel->day_for_price);
+
         //create transaction
         transaction::create([
             'wallet_id' => $req->wallet_id,
@@ -355,6 +362,8 @@ class ApiMainController extends Controller
             'transaction_id' => $guid,
             'transaction_status' => 2,
             'transaction_amount' => $hotel->price,
+            'check_in_date' => $check_in_date_time,
+            'check_out_date' => $check_out_date_time,
         ]);
 
         return response()->json(['status' => true, 'message' => 'Otel için Giriş İsteği başarıyla oluşturuldu!']);
