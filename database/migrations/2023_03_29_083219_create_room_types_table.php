@@ -17,6 +17,10 @@ class CreateRoomTypesTable extends Migration
             $table->id();
             $table->string('room_type');
             $table->string('room_price');
+
+            //discount
+            $table->string('discount_percent')->nullable();
+
             //hotel_id is the foreign key
             $table->unsignedBigInteger('hotel_id');
             $table->foreign('hotel_id')->references('id')->on('hotels');

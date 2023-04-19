@@ -14,7 +14,8 @@ class room_types extends Model
     protected $fillable = [
         'room_type',
         "room_price",
-        "hotel_id"
+        "hotel_id",
+        "discount_percent"
     ];
     
     //relationship with hotel

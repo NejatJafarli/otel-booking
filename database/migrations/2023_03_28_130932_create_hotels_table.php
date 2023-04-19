@@ -18,7 +18,7 @@ class CreateHotelsTable extends Migration
             $table->string('name');
             $table->string('address');
             $table->string('price')->nullable();
-            $table->string('HowManyDays_for_price')->nullable();
+            $table->string('day_for_price')->nullable();
             $table->timestamps();
         });
     }

@@ -12,9 +12,8 @@ class Hotel extends Model
     //fillable
     protected $fillable = [
         'name',
-        'address',
         'price',
-        "HowManyDays_for_price"
+        "day_for_price"
     ];
 
 

@@ -67,7 +67,7 @@
                                     <th class="pt-0">Otel Ismi</th>
                                     <th class="pt-0">Kullanici Adi</th>
                                     <th class="pt-0">Trancation Id</th>
-
+                                    <th class="pt-0">Islem Tarihi</th>
                                     <th class="pt-0">Durum</th>
                                 </tr>
                             </thead>
@@ -80,6 +80,11 @@
                                         <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
                                         <td>{{ $tran->user->username }}</td>
                                         <td>{{ $tran->transaction_id }}</td>
+                                        {{-- <td>{{$tran->created_at}}</td> created at is 
+                                        2023-04-18 
+                                        18-04-2023
+                                        --}}
+                                        <td>{{ date('d-m-Y  H:i:s ', strtotime($tran->created_at)) }}</td>
                                         {{-- //tranactions status with badge  --}}
                                         @if ($tran->transaction_status == 0)
                                             <td><span class="badge bg-success">Onaylandi</span></td>

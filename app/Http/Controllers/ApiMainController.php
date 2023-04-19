@@ -127,6 +127,12 @@ class ApiMainController extends Controller
         $amount = $oneDayPrice * $buyOption->option_days;
 
 
+        // //get discount from buy option
+        // $discount = $buyOption->option_discount;
+        // $amount = $amount - ($amount * $discount / 100);
+
+
+
         $guid = $this->guidGenerator();
 
         transaction::create([

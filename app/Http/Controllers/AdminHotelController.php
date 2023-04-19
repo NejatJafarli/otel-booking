@@ -20,13 +20,27 @@ class AdminHotelController extends Controller
         //hotelname and address validation
         $request->validate([
             'hotelname'=>'required | max:255 | min:3 | unique:hotels,name',
-            'hoteladdress'=>'required | max:255 | min:3',
         ]);
+
+        if($request->hotelprice!=null){
+         //validate hotelprice and hoteldayforprice 
+            $request->validate([
+                'hotelprice'=>'required | numeric | min:1',
+                'hoteldayforprice'=>'required | integer | min:1'
+            ],[
+                'hotelprice.required'=>'Otel fiyatı boş bırakılamaz!',
+                'hotelprice.numeric'=>'Otel fiyatı sayısal olmalıdır!',
+                'hotelprice.min'=>'Otel fiyatı en az 1 olmalıdır!',
+                'hoteldayforprice.required'=>'Otel fiyatı günü boş bırakılamaz!',
+                'hoteldayforprice.integer'=>'Otel fiyatı günü sayısal olmalıdır!',
+                'hoteldayforprice.min'=>'Otel fiyatı günü en az 1 olmalıdır!'
+            ]);
+        }
 
         //create hotel
         $hotel=Hotel::create([
             'name'=>$request->hotelname,
-            'address'=>$request->hoteladdress,
+            'day_for_price'=>$request->hoteldayforprice,
             'price'=>$request->hotelprice
         ]);
 
@@ -55,8 +69,6 @@ class AdminHotelController extends Controller
         $request->validate([
             'hotel_id'=>'required | integer',
             'hotelname'=>'required | max:255 | min:3',
-            'hoteladdress'=>'required | max:255 | min:3',
-            'hotelprice'=>'required'
         ],[
             'hotel_id.required'=>'Otel id boş bırakılamaz!',
             'hotel_id.integer'=>'Otel id sayısal olmalıdır!',
@@ -64,16 +76,29 @@ class AdminHotelController extends Controller
             'hotelname.max'=>'Otel adı en fazla 255 karakter olabilir!',
             'hotelname.min'=>'Otel adı en az 3 karakter olabilir!',
             'hoteladdress.required'=>'Otel adresi boş bırakılamaz!',
-            'hoteladdress.max'=>'Otel adresi en fazla 255 karakter olabilir!',
-            'hoteladdress.min'=>'Otel adresi en az 3 karakter olabilir!',
-            'hotelprice.required'=>'Otel fiyatı boş bırakılamaz!'
         ]);
 
+        if($request->hotelprice!=null){
+            //validate hotelprice and hoteldayforprice 
+                $request->validate([
+                    'hotelprice'=>'required | numeric | min:1',
+                    'hoteldayforprice'=>'required | integer | min:1'
+                ],[
+                    'hotelprice.required'=>'Otel fiyatı boş bırakılamaz!',
+                    'hotelprice.numeric'=>'Otel fiyatı sayısal olmalıdır!',
+                    'hotelprice.min'=>'Otel fiyatı en az 1 olmalıdır!',
+                    'hoteldayforprice.required'=>'Otel fiyatı günü boş bırakılamaz!',
+                    'hoteldayforprice.integer'=>'Otel fiyatı günü sayısal olmalıdır!',
+                    'hoteldayforprice.min'=>'Otel fiyatı günü en az 1 olmalıdır!'
+                ]);
+        }
         $hotel=Hotel::find($request->hotel_id);
         if($hotel){
             $hotel->name=$request->hotelname;
-            $hotel->address=$request->hoteladdress;
-            $hotel->price=$request->hotelprice;
+            if($request->hotelprice!=null){
+                $hotel->day_for_price=$request->hoteldayforprice;
+                $hotel->price=$request->hotelprice;
+            }
             $hotel->save();
             return response()->json([
                 "status"=>true,

@@ -85,14 +85,14 @@
                                                         name="hotelname" value="{{ old('hotelname') }}">
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="hoteladdress" class="form-label">Otel Adresi</label>
-                                                    <input type="text" class="form-control" id="hoteladdress"
-                                                        name="hoteladdress" value="{{ old('hoteladdress') }}">
-                                                </div>
-                                                <div class="mb-3">
                                                     <label for="hotelprice" class="form-label">Otel Fiyati</label>
                                                     <input type="text" class="form-control" id="hotelprice"
                                                         name="hotelprice" value="{{ old('hotelprice') }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="day_for_price" class="form-label">Fiyat Karsiligi Otelde Kalinicak Gun sayisi</label>
+                                                    <input type="number" class="form-control" id="day_for_price"
+                                                        name="day_for_price" value="{{ old('day_for_price') }}">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -112,8 +112,8 @@
                                 <tr>
                                     <th class="pt-0">#</th>
                                     <th class="pt-0">Otel Ismi</th>
-                                    <th class="pt-0">Otel Adresi</th>
                                     <th class="pt-0">Otel Fiyati</th>
+                                    <th class="pt-0">Fiyat Karsiligi Otelde Kalinicak Gun sayisi</th>
                                     <th class="pt-0">Action</th>
                                 </tr>
                             </thead>
@@ -123,8 +123,8 @@
                                     <tr>
                                         <td>{{ $hotel->id }}</td>
                                         <td>{{ $hotel->name }}</td>
-                                        <td>{{ $hotel->address }}</td>
                                         <td>{{ $hotel->price }}</td>
+                                        <td>{{ $hotel->day_for_price }}</td>
                                         <td class="text-right">
                                             <button
                                                 onclick="editHotel(
@@ -172,12 +172,12 @@
                             <input type="text" class="form-control" id="edit_hotelname" name="hotelname">
                         </div>
                         <div class="mb-3">
-                            <label for="hoteladdress" class="form-label">Otel Adresi</label>
-                            <input type="text" class="form-control" id="edit_hoteladdress" name="hoteladdress">
-                        </div>
-                        <div class="mb-3">
                             <label for="edit_hotelprice" class="form-label">Otel Fiyati</label>
                             <input type="text" class="form-control" id="edit_hotelprice" name="edit_hotelprice">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_hoteldayforprice" class="form-label">Fiyat Karsiligi Otelde Kalinicak Gun sayisi</label>
+                            <input type="number" class="form-control" id="edit_hoteldayforprice" name="edit_hoteldayforprice">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -249,9 +249,9 @@
             let hotel_name = document.getElementById('edit_hotelname');
             //set value
             hotel_name.value = json.hotel_name;
-            let hotel_address = document.getElementById('edit_hoteladdress');
+            let hotel_address = document.getElementById('edit_hoteldayforprice');
             //get element by id edit_room_type
-            hotel_address.value = json.hotel_address;
+            hotel_address.value = json.day_for_price;
 
             // edit_hotelprice
             let hotel_price = document.getElementById('edit_hotelprice');
@@ -280,9 +280,9 @@
                     //ajax ile silme islemi
                     let data = {
                         _token: "{{ csrf_token() }}",
-                        hotel_id: $('#edit_hotel_id').val(),
+                        hotel_id: $('#edit_id').val(),
                         hotelname: $('#edit_hotelname').val(),
-                        hoteladdress: $('#edit_hoteladdress').val(),
+                        hoteldayforprice: $('#edit_hoteldayforprice').val(),
                         hotelprice: $('#edit_hotelprice').val(),
                     }
                     console.log(data);
