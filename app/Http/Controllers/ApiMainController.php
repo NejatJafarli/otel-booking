@@ -69,15 +69,14 @@ class ApiMainController extends Controller
                 //find discount
                 $discount = $room_type->room_price * ($buyOption->discount_percent/100);
                 $price = $room_type->room_price - $discount;
-                $priceArray[] = $price * $buyOption->option_days;
+                $priceArray[] = ($price/7) * $buyOption->option_days;
             }else{
-                $priceArray[] =  $room_type->room_price * $buyOption->option_days;
+                $priceArray[] =  ($room_type->room_price/7) * $buyOption->option_days;
             }
             $OneEth= $this->GetCurrentEthValueByUsd();
             $UsdPrice= $priceArray[count($priceArray)-1];
             $realPrice = $UsdPrice/$OneEth;
             //get 4 decimal
-
             $priceEthArray[] =$this->convertEthToWeiAndConvertHex($realPrice);
         }
         

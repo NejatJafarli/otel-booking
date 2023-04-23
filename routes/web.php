@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminRoomController;
 use App\Http\Controllers\AdminTransactionController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminHotelController;
+use App\Http\Controllers\AdminBuyOptionController;
 use App\Http\Controllers\AdminFinanceController;
 
 /*
@@ -78,7 +79,17 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         Route::post('/getDatas', [AdminFinanceController::class, 'datebydateReports'])->name('datebydateReports');
        
     });
+    Route::group(['prefix' => 'buyOption'], function () {
+        
+        Route::get('', [AdminBuyOptionController::class, 'buyOptions'])->name('buyOptions');
 
+        Route::post('/create', [AdminBuyOptionController::class, 'createBuyOption'])->name('createBuyOption');
+
+        Route::get('/delete/{id}', [AdminBuyOptionController::class, 'deleteBuyOption'])->name('deleteBuyOption');
+
+        Route::post('/edit', [AdminBuyOptionController::class, 'editBuyOption'])->name('editBuyOptions');
+        
+    });
     //route group Rooms
     Route::group(['prefix' => 'rooms'], function () {
         

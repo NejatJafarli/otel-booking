@@ -75,6 +75,12 @@ License: For each use you must have a valid license purchased only from above li
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('buyOptions') }}" class="nav-link">
+                            <i class="link-icon" data-feather="home"></i>
+                            <span class="link-title">Satin Alma Secenekleri</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('roomTypes') }}" class="nav-link">
                             <i class="link-icon" data-feather="tablet"></i>
                             <span class="link-title">Oda Turleri</span>
