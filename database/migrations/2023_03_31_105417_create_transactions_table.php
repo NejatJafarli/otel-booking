@@ -23,7 +23,7 @@ class CreateTransactionsTable extends Migration
             //start date, end date, duration
             $table->datetime('check_in_date')->nullable();
             $table->datetime('check_out_date')->nullable();
-            //transaction_id\
+            //transaction_id
             $table->string('transaction_id');
             
             $table->string('transaction_status')->nullable(); //0=success, 1=failed

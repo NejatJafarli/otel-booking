@@ -16,7 +16,7 @@ class CreateRoomsTable extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             //room number, room type, room price, room status
-            $table->string('room_number')->unique();
+            $table->string('room_number');
             $table->unsignedBigInteger('room_type_id');
             $table->string('room_status')->default("0");//0=available, 1=occupied, 2=reserved
             $table->foreign('room_type_id')->references('id')->on('room_types');

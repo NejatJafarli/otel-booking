@@ -15,6 +15,17 @@ use Illuminate\Support\Facades\Hash;
 class ApiMainController extends Controller
 {
 
+    
+    // decimal to hex
+    public function dec2hex($dec) {
+        return dechex($dec);
+    }
+
+     //convert eth to wei
+     public function convertEthToWeiAndConvertHex($eth){
+        return "0x".$this->dec2hex($eth * 1000000000000000000);
+    }
+
     private function guidGenerator()
     {
         $data = random_bytes(16);
@@ -23,16 +34,55 @@ class ApiMainController extends Controller
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    public function getBuyOptions(){
+    private function GetCurrentEthValueByUsd(){
+
+        $url='https://bitpay.com/api/rates';
+        $json=json_decode( file_get_contents( $url ) );
+        $dollar=$btc=0;
+        $eth = 0;
+        $usd = 1;
+        foreach( $json as $obj ){
+            if( $obj->code=='USD' )$btc=$obj->rate;
+            if( $obj->code=='ETH' )$eth=$obj->rate;
+        }
+        
+         return intval( ($usd/$eth)*$btc);
+            
+    }
+
+    public function getBuyOptions($type_id){
+
+        $room_type = room_types::find($type_id);
+        if($room_type == null){
+            return response()->json(['status' => false, 'message' => 'room type not found']);
+        }
+
+
         $buyOptions = BuyOptions::all();
         
         $array = [];
+        $priceArray = [];
+        $priceEthArray = [];
         foreach($buyOptions as $buyOption){
             $array[] = $buyOption->option_name;
+            if($buyOption->discount_percent!=null){
+                //find discount
+                $discount = $room_type->room_price * ($buyOption->discount_percent/100);
+                $price = $room_type->room_price - $discount;
+                $priceArray[] = $price * $buyOption->option_days;
+            }else{
+                $priceArray[] =  $room_type->room_price * $buyOption->option_days;
+            }
+            $OneEth= $this->GetCurrentEthValueByUsd();
+            $UsdPrice= $priceArray[count($priceArray)-1];
+            $realPrice = $UsdPrice/$OneEth;
+            //get 4 decimal
+
+            $priceEthArray[] =$this->convertEthToWeiAndConvertHex($realPrice);
         }
         
         
-        return response()->json(['status' => true, 'option_names' => $array]);
+        return response()->json(['status' => true, 'option_names' => $array ,"prices"=>$priceArray,"eth_prices"=>$priceEthArray]);
     }
     //
     public function getUser($id)
@@ -41,6 +91,7 @@ class ApiMainController extends Controller
         return response()->json(['status' => true, 'user' => $user]);
     }
 
+ 
     public function getRoomTypes()
     {
 
@@ -100,7 +151,7 @@ class ApiMainController extends Controller
         //check in date and check out date
 
         //get check in date datetime
-        $check_in_date_time = date('Y-m-d H:i:s');
+        $check_in_date= date('Y-m-d H:i:s');
         $check_out_date = date('Y-m-d H:i:s', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
         //check if user exists
         $user = User::where('wallet_id', $request->wallet_id)->first();
@@ -322,7 +373,7 @@ class ApiMainController extends Controller
         }
     }
 
-    public function enterHotelRequest(Request $req){
+    public function BuyHotelRequest(Request $req){
         // 'wallet_id' => 'required', and hotel id
         $req->validate(
             [
@@ -366,21 +417,21 @@ class ApiMainController extends Controller
             'check_out_date' => $check_out_date_time,
         ]);
 
-        return response()->json(['status' => true, 'message' => 'Otel için Giriş İsteği başarıyla oluşturuldu!']);
+        return response()->json(['status' => true,'transaction_id'=>$guid, 'message' => 'Otel için Giriş İsteği başarıyla oluşturuldu!']);
     }
 
-    public function enterHotelConfirm(Request $req){
+    public function BuyHotelConfirm(Request $req){
         // transaction id // status 0 or 1
         $req->validate(
             [
                 'transaction_id' => 'required|string',
-                'transaction.status' => 'required|integer',
+                'transaction_status' => 'required|integer',
             ],
             [
                 'transaction_id.required' => 'İşlem ID boş olamaz!',
                 'transaction_id.string' => 'İşlem ID sadece harflerden oluşmalı!',
-                'transaction.status.required' => 'Durum boş olamaz!',
-                'transaction.status.integer' => 'Durum sadece sayılardan oluşmalı!',
+                'transaction_status.required' => 'Durum boş olamaz!',
+                'transaction_status.integer' => 'Durum sadece sayılardan oluşmalı!',
             ]
         );
 
@@ -414,4 +465,76 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Durum 0 veya 1 olmalı!']);
         }
     }
+    public function getHotel($id){
+        $hotel = Hotel::find($id);
+        if(!$hotel){
+            return response()->json(['status' => false, 'message' => 'Otel bulunamadı!']);
+        }
+
+        //change hotel field name like name -= hotel_name
+        $hotel->Hotel_Name = $hotel->name;
+        unset($hotel->name);
+        $hotel->Hotel_Type=$hotel->price == null ? 0 : 1;
+        $hotel->Hotel_Price=$hotel->price;
+        unset($hotel->price);
+        $hotel->Hotel_DayForPrice=$hotel->day_for_price;
+        unset($hotel->day_for_price);
+
+        return response()->json(['status' => true, 'message' => 'Otel bilgileri getirildi!','hotel'=>$hotel]);
+    }
+
+    public function enterHotel(Request $req){
+        //wallet id and hotel_id
+        $req->validate(
+            [
+                'wallet_id' => 'required|string',
+                'hotel_id' => 'required|integer',
+            ],
+            [
+                'wallet_id.required' => 'Cüzdan ID boş olamaz!',
+                'wallet_id.string' => 'Cüzdan ID sadece harflerden oluşmalı!',
+                'hotel_id.required' => 'Otel ID boş olamaz!',
+                'hotel_id.integer' => 'Otel ID sadece sayılardan oluşmalı!',
+            ]
+        );
+
+        //find hotel
+        $hotel = Hotel::find($req->hotel_id);
+        
+        if(!$hotel)
+            return response()->json(['status' => false, 'message' => 'Otel bulunamadı!']);
+        
+
+        //check if hotel is have price
+        if($hotel->price == null)
+            return response()->json(['status' => false, 'message' => 'Otel için fiyat belirlenmemiş!']);
+        
+
+        //find wallet
+        $user = User::where("wallet_id",$req->wallet_id);
+
+
+        if(!$user)
+            return response()->json(['status' => false, 'message' => 'Kullanici bulunamadı!']);
+
+
+        //check transaction
+        $transaction = transaction::where('wallet_id',$req->wallet_id)->where('hotel_id',$req->hotel_id)->where('transaction_status',0)->first();
+
+        if($transaction){
+            //check date
+            $check_in_date_time = Carbon::parse($transaction->check_in_date);
+            $check_out_date_time = Carbon::parse($transaction->check_out_date);
+
+            $now = Carbon::now();
+
+            if($now->between($check_in_date_time,$check_out_date_time))
+                return response()->json(['status' => true, 'message' => 'Otel için Giriş Satin Alimi bulundu!']);
+            
+        }else
+            return response()->json(['status' => false,"price"=>$hotel->price,"priceforday"=>$hotel->day_for_price,"payment"=>true, 'message' => 'Otel için Giriş Satin Alimi bulunamadı!']);
+    }
+
+
+   
 }

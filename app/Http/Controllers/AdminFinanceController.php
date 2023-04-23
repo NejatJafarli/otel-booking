@@ -128,18 +128,36 @@ class AdminFinanceController extends Controller
         $hotels=Hotel::all();
         
         
-        return view('Admin/Finance/raporlar',["hotels"=>$hotels,'data_7' => $data_7, 'data_30' => $data_30, 'data_7_sum' => $data_7_sum, 'data_30_sum' => $data_30_sum, 'data_60' => $data_60, 'data_60_sum' => $data_60_sum]);
+        return view('Admin/Finance/raporlar',["hotel_id"=>$hotel_id,"hotels"=>$hotels,'data_7' => $data_7, 'data_30' => $data_30, 'data_7_sum' => $data_7_sum, 'data_30_sum' => $data_30_sum, 'data_60' => $data_60, 'data_60_sum' => $data_60_sum]);
     }
 
     public function datebydateReports(Request $req){
         $startDate = $req->startDate;
         $endDate = $req->endDate;
+        $hotel_id=$req->hotel_id;
+        $room_ids;
+
+        if($hotel_id!=null &&$hotel_id!="-1" ){
+            // get room types which one is hotel_id equal
+            $room_types=room_types::where('hotel_id',$hotel_id)->get();
+            //get room ids from room_types
+            $room_type_ids=$room_types->pluck('id');
+
+            //get rooms which one is room_type_id equal
+            $rooms=room::whereIn('room_type_id',$room_type_ids)->get();
+            //get room ids from rooms
+            $room_ids=$rooms->pluck('id');
+        }
+        
         $Maindata = transaction::where('transaction_status',0)->where('created_at','>=',$startDate)->where('created_at','<=',$endDate);
+        if($hotel_id !=null && $hotel_id !="-1"){
+            $Maindata=$Maindata->whereIn('room_id',$room_ids);
+        }
+        
         $data_sum=$this->moneyAmerican($Maindata->sum('transaction_amount'));
         $data_count = $Maindata->count();
         $data = $Maindata->selectRaw('DATE(created_at) as date, sum(transaction_amount) as amount, count(*) as count')->groupBy('date')->get();
         //return json response 
         return response()->json(["status"=>true,'data' => $data, 'data_sum' => $data_sum, 'data_count' => $data_count]);
-        
     }
 }

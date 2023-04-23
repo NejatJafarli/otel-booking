@@ -412,7 +412,8 @@
             let data = {
                 _token: "{{ csrf_token() }}",
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                hotel_id: "{{ $hotel_id }}"
             }
             $.ajax({
                 type: "POST",

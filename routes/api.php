@@ -29,16 +29,20 @@ Route::get('user/rooms/{id}', [ApiMainController::class, 'getUserRooms']);
 Route::get('/room_types', [ApiMainController::class, 'getRoomTypes']);
 
 //get buy options
-Route::get('/buy_options', [ApiMainController::class, 'getBuyOptions']);
+Route::get('/buy_options/{type_id}', [ApiMainController::class, 'getBuyOptions']);
 
+Route::get('getHotel/{id}', [ApiMainController::class, 'getHotel']);
+
+Route::post('enterHotel', [ApiMainController::class, 'enterHotel']);
 // buy a room
 Route::post('user/buyRoomRequest', [ApiMainController::class, 'buyRoomRequest']);
 
 Route::post('user/buyRoomConfirm', [ApiMainController::class, 'buyRoomConfirm']);
 Route::post('user/setRoomPassword', [ApiMainController::class, 'setRoomPassword']);
 
-Route::post('user/enterHotelRequest', [ApiMainController::class, 'enterHotelRequest']);
-Route::post('user/enterHotelConfirm', [ApiMainController::class, 'enterHotelConfirm']);
+Route::post('user/BuyHotelRequest', [ApiMainController::class, 'BuyHotelRequest']);
+Route::post('user/BuyHotelConfirm', [ApiMainController::class, 'BuyHotelConfirm']);
+
 
 //enter room
 Route::post('enterRoom', [ApiMainController::class, 'enterRoom']);
