@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminHotelController;
 use App\Http\Controllers\AdminBuyOptionController;
 use App\Http\Controllers\AdminFinanceController;
+use App\Http\Controllers\AdminConfigController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,7 +72,17 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         Route::post('/edit', [AdminRoomController::class, 'editRoomType'])->name('editRoomType');
         
     });
-
+    Route::group(['prefix' => 'configs'],function () {
+        
+        Route::get('', [AdminConfigController::class, 'configs'])->name('configs');
+        
+        Route::post('/create', [AdminConfigController::class, 'createMyConfig'])->name('createMyConfig');
+        
+        Route::get('/delete/{id}', [AdminConfigController::class, 'deleteMyConfig'])->name('deleteMyConfig');
+        
+        Route::post('/edit', [AdminConfigController::class, 'editMyConfig'])->name('editMyConfig');
+        
+    });
     Route::group(['prefix' => 'finance'],function () {
 
         Route::get('', [AdminFinanceController::class, 'raporlar'])->name('raporlar');

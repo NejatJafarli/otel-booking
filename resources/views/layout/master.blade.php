@@ -108,7 +108,13 @@ License: For each use you must have a valid license purchased only from above li
                     <li class="nav-item">
                         <a href="{{ route('trans') }}" class="nav-link">
                             <i class="link-icon" data-feather="tablet"></i>
-                            <span class="link-title">Transactions</span>
+                            <span class="link-title">Oda Satin Alim Transactions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('configs') }}" class="nav-link">
+                            <i class="link-icon" data-feather="tablet"></i>
+                            <span class="link-title">Ayarlar (Config)</span>
                         </a>
                     </li>
                     <li class="nav-item nav-category">Finans Ayarlari</li>

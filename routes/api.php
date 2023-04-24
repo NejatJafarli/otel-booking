@@ -47,6 +47,7 @@ Route::post('user/BuyHotelConfirm', [ApiMainController::class, 'BuyHotelConfirm'
 //enter room
 Route::post('enterRoom', [ApiMainController::class, 'enterRoom']);
 Route::post('getBookedRooms', [ApiMainController::class, 'getBookedRooms']);
+Route::post('getConfig', [ApiMainController::class, 'getConfig']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
