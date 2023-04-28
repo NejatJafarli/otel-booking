@@ -64,9 +64,10 @@
                                     <th class="pt-0">#</th>
                                     <th class="pt-0">Oda Numarasi</th>
                                     <th class="pt-0">Oda Tipi</th>
-                                    <th class="pt-0">Otel Ismi</th>
+                                    <th class="pt-0">Satin alinan Odanin Ait oldugu Otel Ismi</th>
                                     <th class="pt-0">Kullanici Adi</th>
                                     <th class="pt-0">Trancation Id</th>
+                                    <th class="pt-0">Transaction Turu</th>
                                     <th class="pt-0">Islem Tarihi</th>
                                     <th class="pt-0">Durum</th>
                                 </tr>
@@ -75,16 +76,35 @@
                                 @foreach ($transactions as $tran)
                                     <tr>
                                         <td>{{ $tran->id }}</td>
-                                        <td>{{ $tran->room->room_number }}</td>
-                                        <td>{{ $tran->room->room_type()->first()->room_type }}</td>
-                                        <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
+                                        @if ($tran->room_id == null)
+                                            <td>Yok</td>
+                                            <td>Yok</td>
+                                            <td>Yok</td>
+                                        @else
+                                            <td>{{ $tran->room->room_number }}</td>
+                                            <td>{{ $tran->room->room_type()->first()->room_type }}</td>
+                                            <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
+                                        @endif
                                         <td>{{ $tran->user->username }}</td>
+                                        {{-- //tranactions status with badge  --}}
+
                                         <td>{{ $tran->transaction_id }}</td>
                                         {{-- <td>{{$tran->created_at}}</td> created at is 
                                         2023-04-18 
                                         18-04-2023
                                         --}}
+                                        @php
+                                            if ($tran->room_id != null && $tran->hotel_id == null) {
+                                                echo '<td>Oda Satin Alim</td>';
+                                            } elseif ($tran->hotel_id != null && $tran->room_id == null) {
+                                                echo '<td>Hotel Giris Istegi Satin Alim</td>';
+                                            }else{
+                                                echo '<td>HATA HEM OTEL HEM ODA ID SI NULL DEGIL VEYA IKISIDE NULL</td>';
+                                            }
+                                        @endphp
+
                                         <td>{{ date('d-m-Y  H:i:s ', strtotime($tran->created_at)) }}</td>
+
                                         {{-- //tranactions status with badge  --}}
                                         @if ($tran->transaction_status == 0)
                                             <td><span class="badge bg-success">Onaylandi</span></td>

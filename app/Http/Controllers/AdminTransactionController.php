@@ -15,7 +15,7 @@ class AdminTransactionController extends Controller
     {
 
 
-        $trans_count = transaction::count();
+        $trans_count = transaction::where('room_id', '!=', null)->count();
 
         //order by id desc and paginate
         // $trans = transaction::orderBy('id', 'desc')->get(); where room_id is not null
