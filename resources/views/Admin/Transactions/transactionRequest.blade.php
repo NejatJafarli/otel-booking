@@ -70,6 +70,7 @@
                                     <th class="pt-0">Transaction Turu</th>
                                     <th class="pt-0">Islem Tarihi</th>
                                     <th class="pt-0">Durum</th>
+                                    <th class="pt-0">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -85,10 +86,10 @@
                                             <td>{{ $tran->room->room_type()->first()->room_type }}</td>
                                             <td>{{ $tran->room->room_type()->first()->hotel()->first()->name }}</td>
                                         @endif
-                                        @if($tran->user!=null)
-                                        <td>{{ $tran->user->username }}</td>
+                                        @if ($tran->user != null)
+                                            <td>{{ $tran->user->username }}</td>
                                         @else
-                                        <td>Kullanici Bulunamadi</td>
+                                            <td>Kullanici Bulunamadi</td>
                                         @endif
                                         {{-- //tranactions status with badge  --}}
 
@@ -102,7 +103,7 @@
                                                 echo '<td>Oda Satin Alim</td>';
                                             } elseif ($tran->hotel_id != null && $tran->room_id == null) {
                                                 echo '<td>Hotel Giris Istegi Satin Alim</td>';
-                                            }else{
+                                            } else {
                                                 echo '<td>HATA HEM OTEL HEM ODA ID SI NULL DEGIL VEYA IKISIDE NULL</td>';
                                             }
                                         @endphp
@@ -110,13 +111,21 @@
                                         <td>{{ date('d-m-Y  H:i:s ', strtotime($tran->created_at)) }}</td>
 
                                         {{-- //tranactions status with badge  --}}
-                                        @if ($tran->transaction_status == 0)
-                                            <td><span class="badge bg-success">Onaylandi</span></td>
-                                        @elseif($tran->transaction_status == 2)
-                                            <td><span class="badge bg-warning">Onay Bekliyor</span></td>
-                                        @elseif($tran->transaction_status == 1)
-                                            <td><span class="badge bg-danger">Iptal Edildi</span></td>
-                                        @endif
+
+                                        <td><span class="badge bg-warning">Onay Bekliyor</span></td>
+
+                                        <td class="text-right">
+                                            <button onclick="ConfirmTranOrReject('{{ $tran->transaction_id }}',0)"
+                                                type="button" class="btn btn-xs btn-success btn-icon"
+                                                data-bs-toggle="modal" data-bs-target="#exampleModal2">
+                                                <i class="link-icon" data-feather="check"></i>
+                                            </button>
+
+                                            <button onclick="ConfirmTranOrReject('{{ $tran->transaction_id }}',1)"
+                                                type="button" class="btn btn-xs btn-danger btn-icon">
+                                                <i class="link-icon" data-feather="x"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -127,6 +136,62 @@
         </div>
     @endsection
     @section('js')
+        <script>
+            function ConfirmTranOrReject(id, status) {
+
+                swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu islem geri alinamaz!",
+                    icon: 'warning',
+                    //change content color
+                    customClass: {
+                        content: 'text-dark'
+                    },
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, sil!',
+                    cancelButtonText: 'Hayir, iptal et!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        //ajax ile silme islemi
+                        let data = {
+                            _token: "{{ csrf_token() }}",
+                            transaction_id: id,
+                            transaction_status: status,
+                        }
+                        let url = "{{ route('confirmOrRejectTransaction') }}";
+                        $.ajax({
+                            type: "POST",
+                            data: data,
+                            url: url,
+                            success: function(response) {
+                                console.log(response);
+                                if (response.status) {
+                                    Swal.fire(
+                                        'Basarili!',
+                                        'Islem basariyla gerceklestirildi.',
+                                        'success'
+                                    ).then((result) => {
+                                        if (result.isConfirmed) {
+                                            location.reload();
+                                        }
+                                    })
+                                } else {
+                                    Swal.fire(
+                                        'Hata!',
+                                        response.message,
+                                        'error'
+                                    )
+                                }
+                            }
+                        });
+                    }
+                })
+
+            }
+        </script>
+
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 

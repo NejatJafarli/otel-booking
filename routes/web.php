@@ -136,6 +136,8 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
 
     Route::group(['prefix' => 'trans'], function () {
         Route::get('', [AdminTransactionController::class, 'trans'])->name('trans');
+        Route::get('/requests', [AdminTransactionController::class, 'trans_request'])->name('trans_request');
+        Route::post('/confirmOrRejectTransaction', [AdminTransactionController::class, 'confirmOrRejectTransaction'])->name('confirmOrRejectTransaction');
     });
 
     

@@ -364,7 +364,7 @@ class ApiMainController extends Controller
 
         //check if transaction is confirmed
         if($transaction->transaction_status != 0){
-            return response()->json(['status' => false, 'message' => 'This transaction is not confirmed!']);
+            return response()->json(['status' => false, 'message' => 'This room transaction is not confirmed!']);
         }
 
         //check dates

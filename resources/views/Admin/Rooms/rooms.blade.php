@@ -55,10 +55,13 @@
             <div class="card">
                 <div class="card-body">
                     <form id="selected_hotel_id" action="{{ route('rooms') }}" method="GET">
-                        <select id="select_hotel_id" class="form-select" aria-label="Default select example" name="hotel_id">
+                        <select id="select_hotel_id" class="form-select" aria-label="Default select example"
+                            name="hotel_id">
                             <option value="-1" selected>Otel Seciniz</option>
                             @foreach ($hotels as $hotel)
-                                <option value="{{ $hotel->id }}" {{request()->query('hotel_id')==$hotel->id?"selected":""}}>{{ $hotel->name }}</option>
+                                <option value="{{ $hotel->id }}"
+                                    {{ request()->query('hotel_id') == $hotel->id ? 'selected' : '' }}>{{ $hotel->name }}
+                                </option>
                             @endforeach
                         </select>
                     </form>
@@ -190,7 +193,15 @@
                                             @php
                                                 //use model user
                                                 
-                                                $transaction = transaction::where('room_id', $room->id)->first();
+                                                $transaction = transaction::where('room_id', $room->id)
+                                                    ->where('transaction_status', 0)
+                                                    ->first();
+                                                // $now = date('Y-m-d H:i:s');
+                                                // //check transaction end date
+                                                if ($transaction && $transaction->check_out_date >= $now) {
+                                                    $transaction = null;
+                                                }
+                                                
                                                 $in_date = $out_date = $user = '';
                                                 if ($transaction) {
                                                     $in_date = $transaction->check_in_date;
@@ -433,7 +444,7 @@
             });
 
         });
-        
+
         //$("#selected_hotel_id") onchange submit
         $("#select_hotel_id").change(function() {
             $("#selected_hotel_id").submit();

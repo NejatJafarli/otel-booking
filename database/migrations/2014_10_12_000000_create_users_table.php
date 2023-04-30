@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('username')->unique();
             $table->string('email')->unique()->nullable();
             //add wallet_id just a string unique
-            $table->string('wallet_id');
+            $table->string('wallet_id')->nullable();
             //character number
             $table->integer('character_number')->default(0);
             $table->timestamps();
