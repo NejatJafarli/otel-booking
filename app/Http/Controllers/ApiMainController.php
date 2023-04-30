@@ -7,6 +7,7 @@ use App\Models\room;
 use App\Models\Hotel;
 use App\Models\room_types;
 use App\Models\transaction;
+use App\Models\transaction_request;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -340,9 +341,7 @@ class ApiMainController extends Controller
                 'room_number' => 'required|integer',
             ],
             [
-                // 'room_number.required' => 'Oda numarası boş olamaz!',
-                // 'room_number.integer' => 'Oda numarası sadece sayılardan oluşmalı!',
-                //make english
+              
                 'room_number.required' => 'Room number field cannot be left blank!',
                 'room_number.integer' => 'Room number can only consist of numbers!',
             ]
@@ -519,12 +518,6 @@ class ApiMainController extends Controller
                 'hotel_id' => 'required|integer',
             ],
             [
-                // 'wallet_id.required' => 'Cüzdan ID boş olamaz!',
-                // 'wallet_id.string' => 'Cüzdan ID sadece harflerden oluşmalı!',
-                // 'hotel_id.required' => 'Otel ID boş olamaz!',
-                // 'hotel_id.integer' => 'Otel ID sadece sayılardan oluşmalı!',
-
-                //make english
                 'wallet_id.required' => 'Wallet ID cannot be empty!',
                 'wallet_id.string' => 'Wallet ID can only consist of letters!',
                 'hotel_id.required' => 'Hotel ID cannot be empty!',
@@ -551,7 +544,6 @@ class ApiMainController extends Controller
         if(!$user)
             return response()->json(['status' => false, 'message' => 'User not found!']);
 
-
         //check transaction
         $transaction = transaction::where('wallet_id',$req->wallet_id)->where('hotel_id',$req->hotel_id)->where('transaction_status',0)->first();
 
@@ -576,4 +568,142 @@ class ApiMainController extends Controller
         else
             return response()->json(['status' => false, 'message' => 'Config Not Found']);
     }
+    public function RegisterManuel(Request $req){
+        //username password validation
+        $req->validate(
+            [
+                'username' => 'required|string',
+                'password' => 'required|string',
+                "char_number"=>"required|integer"
+            ],
+            [
+                'username.required' => 'Username cannot be empty!',
+                'username.string' => 'Username can only consist of letters!',
+                'password.required' => 'Password cannot be empty!',
+                'password.string' => 'Password can only consist of letters!',
+                'char_number.required' => 'Char number cannot be empty!',
+                'char_number.integer' => 'Char number can only consist of numbers!',
+            ]
+        );
+
+        //check if username is taken
+        $user = User::where('username',$req->username)->first();
+
+        if($user)
+            return response()->json(['status' => false, 'message' => 'Username is taken!']);
+
+        //create user
+        $user=User::create([
+            'username' => $req->username,
+            'password' => Hash::make($req->password),
+            'character_number' => $req->char_number,
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'User created!']);
+    }
+
+
+    public function LoginManuel(Request $req){
+        //username password validation
+        $req->validate(
+            [
+                'username' => 'required|string',
+                'password' => 'required|string',
+            ],
+            [
+                'username.required' => 'Username cannot be empty!',
+                'username.string' => 'Username can only consist of letters!',
+                'password.required' => 'Password cannot be empty!',
+                'password.string' => 'Password can only consist of letters!',
+            ]
+        );
+
+        //check if username is have
+        $user = User::where('username',$req->username)->first();
+
+        if(!$user)
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+
+        //check password
+        if(!Hash::check($req->password,$user->password))
+            return response()->json(['status' => false, 'message' => 'Password is wrong!']);
+
+        return response()->json(['status' => true, 'message' => 'User logged in!', "wallet_id"=>$user->wallet_id,"character_number"=>$user->character_number]);
+    }
+
+    public function setWalletId(Request $req){
+        //username valdiation
+        $req->validate(
+            [
+                'username' => 'required|string',
+                "password" => "required|string",
+                'wallet_id' => 'required|string',
+            ],
+            [
+                'username.required' => 'Username cannot be empty!',
+                'username.string' => 'Username can only consist of letters!',
+                'wallet_id.required' => 'Wallet ID cannot be empty!',
+                'wallet_id.string' => 'Wallet ID can only consist of letters!',
+            ]
+        );
+
+        //check if username is have
+        $currentUser = User::where('username',$req->username)->first();
+
+        if(!$currentUser)
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+
+        //check password
+        if(!Hash::check($req->password,$currentUser->password))
+            return response()->json(['status' => false, 'message' => 'Password is wrong!']);
+
+        //check if wallet id is taken
+        $user = User::where('wallet_id',$req->wallet_id)->first();
+
+        if($user)
+            return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
+
+        //set wallet id
+        $currentUser->wallet_id=$req->wallet_id;
+        $currentUser->save();
+
+        return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+    }
+
+    //create TransactionRequest
+    public function createTransactionRequest(Request $req){
+        //transaction id validation
+        $req->validate(
+            [
+                'transaction_id' => 'required|string',
+            ],
+            [
+                'transaction_id.required' => 'Transaction ID cannot be empty!',
+                'transaction_id.string' => 'Transaction ID can only consist of letters!',
+            ]
+        );
+
+        //find transaction
+        $transaction = transaction::where('transaction_id',$req->transaction_id)->first();
+
+        if(!$transaction)
+            return response()->json(['status' => false, 'message' => 'Transaction not found!']);
+
+        if($transaction->transaction_status!=2)
+            return response()->json(['status' => false, 'message' => 'Transaction is not pending!']);
+
+        //watch transaction request is have
+        $transactionRequest = transation_request::where('transaction_id',$req->transaction_id)->first();
+
+        if($transactionRequest)
+            return response()->json(['status' => false, 'message' => 'Transaction Request is have!']);
+
+        //create transaction request
+        $transactionRequest=transation_request::create([
+            'transaction_id' => $req->transaction_id,
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Transaction Request created!']);
+    }
+
 }
