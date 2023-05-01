@@ -51,10 +51,10 @@ class AdminTransactionController extends Controller
         //order by id desc and paginate
         // $trans = transaction::orderBy('id', 'desc')->get(); where room_id is not null
         //find room id
-        // foreach ($trans as $t) {
+        foreach ($trans as $t) {
         //     $t->room = $t->room()->first();
-        //     $t->user = User::where("wallet_id", $t->wallet_id)->first();
-        // }
+            $t->user = User::where("wallet_id", $t->wallet_id)->first();
+        }
 
 
         return view('Admin/Transactions/transactionRequest', ['transactions' => $trans, 'trans_count' => $trans_count]);

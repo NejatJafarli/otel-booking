@@ -660,6 +660,9 @@ class ApiMainController extends Controller
         //check if wallet id is taken
         $user = User::where('wallet_id',$req->wallet_id)->first();
 
+        if($user->wallet_id==$req->wallet_id)
+            return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+
         if($user)
             return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
 
@@ -693,13 +696,13 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Transaction is not pending!']);
 
         //watch transaction request is have
-        $transactionRequest = transation_request::where('transaction_id',$req->transaction_id)->first();
+        $transactionRequest = transaction_request::where('transaction_id',$req->transaction_id)->first();
 
         if($transactionRequest)
             return response()->json(['status' => false, 'message' => 'Transaction Request is have!']);
 
         //create transaction request
-        $transactionRequest=transation_request::create([
+        $transactionRequest=transaction_request::create([
             'transaction_id' => $req->transaction_id,
         ]);
 
