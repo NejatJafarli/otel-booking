@@ -41,10 +41,27 @@ License: For each use you must have a valid license purchased only from above li
 
     <link rel="shortcut icon" href="/assets/images/favicon.png" />
 
-    @yield("header")
+
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" defer></script>
+    <script>
+        window.OneSignal = window.OneSignal || [];
+        OneSignal.push(function() {
+            OneSignal.init({
+                appId: "1b7268f1-4239-41c8-b1c1-35a82e32e373",
+            });
+        });
+
+        window.onload = function() {
+            OneSignal.showNativePrompt()
+        };
+
+    </script>
+
+    @yield('header')
 </head>
 
 <body>
+
     <div class="main-wrapper">
 
         <!-- partial:../../partials/_sidebar.html -->

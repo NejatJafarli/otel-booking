@@ -3,6 +3,7 @@
 @php
     use App\Models\transaction;
     use App\Models\User;
+    use App\Models\User_Wallets;
 @endphp
 
 @section('header')
@@ -196,7 +197,7 @@
                                                 $transaction = transaction::where('room_id', $room->id)
                                                     ->where('transaction_status', 0)
                                                     ->first();
-                                                // $now = date('Y-m-d H:i:s');
+                                                $now = date('Y-m-d H:i:s');
                                                 // //check transaction end date
                                                 if ($transaction && $transaction->check_out_date >= $now) {
                                                     $transaction = null;
@@ -206,7 +207,9 @@
                                                 if ($transaction) {
                                                     $in_date = $transaction->check_in_date;
                                                     $out_date = $transaction->check_out_date;
-                                                    $user = User::where('wallet_id', $transaction->wallet_id)->first();
+
+                                                    $userid=User_Wallets::where('wallet_id', $transaction->wallet_id)->first()->id
+                                                    $user = User::find($userid);
                                                 }
                                                 //use model user
                                             @endphp

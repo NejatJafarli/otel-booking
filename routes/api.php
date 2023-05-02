@@ -52,6 +52,8 @@ Route::post('user/createTransactionRequest', [ApiMainController::class, 'createT
 Route::post('enterRoom', [ApiMainController::class, 'enterRoom']);
 Route::post('getBookedRooms', [ApiMainController::class, 'getBookedRooms']);
 Route::post('getConfig', [ApiMainController::class, 'getConfig']);
+Route::post('user/addWalletId', [ApiMainController::class, 'addWalletId']);
+Route::post('user/removeWalletId', [ApiMainController::class, 'removeWalletId']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();

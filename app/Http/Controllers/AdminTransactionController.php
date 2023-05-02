@@ -86,6 +86,9 @@ class AdminTransactionController extends Controller
             return response()->json(['status' => false, 'message' => 'Transaction not found!']);
         }
 
+        $transaction->transaction_id=$tran_req->own_transaction_id;
+        $transaction->save();
+
         if($transaction->hotel_id!=null){
             //check if transaction is hotel transaction
             if($transaction->hotel_id == null){

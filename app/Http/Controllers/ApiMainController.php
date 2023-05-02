@@ -8,6 +8,7 @@ use App\Models\Hotel;
 use App\Models\room_types;
 use App\Models\transaction;
 use App\Models\transaction_request;
+use App\Models\User_Wallets;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -15,8 +16,34 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\myConfig;
 class ApiMainController extends Controller
 {
-
-    
+    function send_notification($message) {
+        $content = array(
+          "en" => $message
+        );
+        
+        $fields = array(
+          'app_id' => "1b7268f1-4239-41c8-b1c1-35a82e32e373",
+          'included_segments' => array('All'),
+          'data' => array("foo" => "bar"),
+          'contents' => $content
+        );
+        
+        $fields = json_encode($fields);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
+                               'Authorization: Basic NjI2MjdkYjItMTNmMi00ZDZkLWE0ODAtZGFkMDg5NjI2OGJh'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      
+        $response = curl_exec($ch);
+        curl_close($ch);
+      
+        return $response;
+      }
     // decimal to hex
     public function dec2hex($dec) {
         return dechex($dec);
@@ -98,7 +125,6 @@ class ApiMainController extends Controller
         return response()->json(['status' => true, 'user' => $user]);
     }
 
- 
     public function getRoomTypes()
     {
 
@@ -161,11 +187,15 @@ class ApiMainController extends Controller
         $check_in_date= date('Y-m-d H:i:s');
         $check_out_date = date('Y-m-d H:i:s', strtotime($check_in_date . ' + ' . $buyOption->option_days . ' days'));
         //check if user exists
-        $user = User::where('wallet_id', $request->wallet_id)->first();
+
+        $userid= User_Wallets::where('wallet_id', $request->wallet_id)->first();
+        if (!$userid) {
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+        }
+        $user = User::find($userid->user_id);
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'User not found!']);
         }
-
         //check if room type exists
         $room_type = room_types::find($request->room_type_id);
         if (!$room_type) {
@@ -196,13 +226,14 @@ class ApiMainController extends Controller
 
         $guid = $this->guidGenerator();
 
-        transaction::create([
+        $tran=transaction::create([
             'room_id' => $available_room->id,
             'user_id' => $user->id,
-            'wallet_id' => $user->wallet_id,
+            'wallet_id' => $request->wallet_id,
+            'user_id'=>$user->id,
             'check_in_date' => $check_in_date,
             'check_out_date' => $check_out_date,
-            'transaction_id' => $guid,
+            // 'transaction_id' => $guid,
             'transaction_amount' => $amount,
             "transaction_status"=>"2"
         ]);
@@ -211,7 +242,7 @@ class ApiMainController extends Controller
         // transaction_booking_status
         // transaction_payment_method
 
-        return response()->json(['status' => true, 'transaction_id' => $guid,"message"=>"Transaction created successfully!"]);
+        return response()->json(['status' => true, 'transaction_id' => $tran->id,"message"=>"Transaction created successfully!"]);
     }
 
     public function buyRoomConfirm(Request $request)
@@ -232,13 +263,14 @@ class ApiMainController extends Controller
         );
 
         //check if transaction exists
-        $transaction = transaction::where('transaction_id', $request->transaction_id)->first();
+        $transaction = transaction::find($request->transaction_id);
         if (!$transaction) {
             return response()->json(['status' => false, 'message' => 'Transaction not found!']);
         }
+        $transaction->transaction_id=$request->real_tran_id;
+        $transaction->save();
 
         if($transaction->transaction_status==2){
-
             $transaction->transaction_status = $request->transaction_status;
             $transaction->save();
           
@@ -309,15 +341,21 @@ class ApiMainController extends Controller
         //wallet id 
         $request->validate(
             [
-                'wallet_id' => 'required|string',
+                'user_id' => 'required',
             ],
             [
-                'wallet_id.required' => 'Wallet ID field cannot be left blank!',
-                'wallet_id.string' => 'Wallet ID can only consist of letters!',
+                'user_id.required' => 'Wallet ID field cannot be left blank!',
             ]
         );
+        //get user wallets by wallet id
+        //get user by wallet id
+        $user = User::find($request->user_id);
+        if(!$user){
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+        }
+        
         //get all user transactions check if transaction status is 0 and check in date and check out date between now
-        $transactions = transaction::where('wallet_id',$request->wallet_id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->get();
+        $transactions = transaction::where('user_id',$user->id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->get();
         if(!$transactions){
             return response()->json(['status' => false, 'message' => 'No reservations found!']);
         }
@@ -421,18 +459,32 @@ class ApiMainController extends Controller
         //checkout date add days $hotel->day_for_price
         $check_out_date_time = Carbon::now()->addDays($hotel->day_for_price);
 
+        //get user wallet
+        $wallet = User_Wallets::where('wallet_id',$req->wallet_id)->first();
+
+        if(!$wallet){
+            return response()->json(['status' => false, 'message' => 'Wallet not found!']);
+        }
+
+        //get user
+        $user = User::find($wallet->user_id);
+        if(!$user){
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+        }
+
         //create transaction
-        transaction::create([
+        $tran=transaction::create([
             'wallet_id' => $req->wallet_id,
             'hotel_id' => $req->hotel_id,
-            'transaction_id' => $guid,
+            "user_id"=>$user->id,
+            // 'transaction_id' => $guid,
             'transaction_status' => 2,
             'transaction_amount' => $hotel->price,
             'check_in_date' => $check_in_date_time,
             'check_out_date' => $check_out_date_time,
         ]);
 
-        return response()->json(['status' => true,'transaction_id'=>$guid, 'message' => 'Hotel purchase request created successfully!']);
+        return response()->json(['status' => true,'transaction_id'=>$tran->id, 'message' => 'Hotel purchase request created successfully!']);
     }
 
     public function BuyHotelConfirm(Request $req){
@@ -444,24 +496,24 @@ class ApiMainController extends Controller
                 'transaction_status' => 'required|integer',
             ],
             [
-                // 'transaction_id.required' => 'İşlem ID alanı boş bırakılamaz!',
-                // 'transaction_status.required' => 'İşlem durumu alanı boş bırakılamaz!',
-                // 'transaction_id.string' => 'İşlem ID sadece harflerden oluşabilir!',
-                // 'transaction_status.integer' => 'İşlem durumu sadece sayılardan oluşabilir!',
-                //make english
+           
                 'transaction_id.required' => 'Transaction ID field cannot be left blank!',
                 'transaction_status.required' => 'Transaction status field cannot be left blank!',
                 'transaction_id.string' => 'Transaction ID can only consist of letters!',
                 'transaction_status.integer' => 'Transaction status can only consist of numbers!',
+                "real_tran_id.required"=>"Real transaction ID field cannot be left blank!",
+                "real_tran_id.string"=>"Real transaction ID can only consist of letters!"
             ]
         );
 
         //find transaction
-        $transaction = transaction::where('transaction_id',$req->transaction_id)->first();
+        $transaction = transaction::find($req->transaction_id);
 
         if(!$transaction){
             return response()->json(['status' => false, 'message' => 'Transaction not found!']);
         }
+        $transaction->transaction_id=$req->real_tran_id;
+        $transaction->save();
 
         //check if transaction is hotel transaction
         if($transaction->hotel_id == null){
@@ -514,12 +566,11 @@ class ApiMainController extends Controller
         //wallet id and hotel_id
         $req->validate(
             [
-                'wallet_id' => 'required|string',
+                'user_id' => 'required',
                 'hotel_id' => 'required|integer',
             ],
             [
-                'wallet_id.required' => 'Wallet ID cannot be empty!',
-                'wallet_id.string' => 'Wallet ID can only consist of letters!',
+                'user_id.required' => 'Wallet ID cannot be empty!',
                 'hotel_id.required' => 'Hotel ID cannot be empty!',
                 'hotel_id.integer' => 'Hotel ID can only consist of numbers!',
             ]
@@ -537,15 +588,14 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Hotel is not for sale!']);
         
 
-        //find wallet
-        $user = User::where("wallet_id",$req->wallet_id);
+        $user = User::find($req->user_id);
 
 
         if(!$user)
             return response()->json(['status' => false, 'message' => 'User not found!']);
 
         //check transaction
-        $transaction = transaction::where('wallet_id',$req->wallet_id)->where('hotel_id',$req->hotel_id)->where('transaction_status',0)->first();
+        $transaction = transaction::where('user_id',$user->id)->where('hotel_id',$req->hotel_id)->where('transaction_status',0)->first();
 
         if($transaction){
             //check date
@@ -599,7 +649,7 @@ class ApiMainController extends Controller
             'character_number' => $req->char_number,
         ]);
 
-        return response()->json(['status' => true, 'message' => 'User created!']);
+        return response()->json(['status' => true, 'message' => 'User created!','user_id'=>$user->id]);
     }
 
 
@@ -628,50 +678,83 @@ class ApiMainController extends Controller
         if(!Hash::check($req->password,$user->password))
             return response()->json(['status' => false, 'message' => 'Password is wrong!']);
 
-        return response()->json(['status' => true, 'message' => 'User logged in!', "wallet_id"=>$user->wallet_id,"character_number"=>$user->character_number]);
+        $wallet_ids=User_Wallets::where('user_id',$user->id)->get()->pluck("wallet_id")->toArray();
+
+        $user_wallet_id=null;
+        if($wallet_ids){
+            $user_wallet_id=$wallet_ids[0];
+        }
+
+        return response()->json(['status' => true, 'message' => 'User logged in!','user_id'=>$user->id,"wallet_id"=>$user_wallet_id, "wallet_ids"=>$wallet_ids,"character_number"=>$user->character_number]);
     }
 
-    public function setWalletId(Request $req){
-        //username valdiation
-        $req->validate(
-            [
-                'username' => 'required|string',
-                "password" => "required|string",
-                'wallet_id' => 'required|string',
-            ],
-            [
-                'username.required' => 'Username cannot be empty!',
-                'username.string' => 'Username can only consist of letters!',
-                'wallet_id.required' => 'Wallet ID cannot be empty!',
-                'wallet_id.string' => 'Wallet ID can only consist of letters!',
-            ]
-        );
+    // public function setWalletId(Request $req){
+    //     //username valdiation
+    //     $req->validate(
+    //         [
+    //             'username' => 'required|string',
+    //             "password" => "required|string",
+    //             'wallet_id' => 'required|string',
+    //             'wallet_id_old' => 'required|string',
+    //         ],
+    //         [
+    //             'username.required' => 'Username cannot be empty!',
+    //             'username.string' => 'Username can only consist of letters!',
+    //             'wallet_id.required' => 'Wallet ID cannot be empty!',
+    //             'wallet_id.string' => 'Wallet ID can only consist of letters!',
+    //             'wallet_id_old.required' => 'Wallet ID cannot be empty!',
+    //             'wallet_id_old.string' => 'Wallet ID can only consist of letters!',
+    //         ]
+    //     );
 
-        //check if username is have
-        $currentUser = User::where('username',$req->username)->first();
+    //     //check if username is have
+    //     $currentUser = User::where('username',$req->username)->first();
 
-        if(!$currentUser)
-            return response()->json(['status' => false, 'message' => 'User not found!']);
+    //     if(!$currentUser)
+    //         return response()->json(['status' => false, 'message' => 'User not found!']);
 
-        //check password
-        if(!Hash::check($req->password,$currentUser->password))
-            return response()->json(['status' => false, 'message' => 'Password is wrong!']);
+    //     //check password
+    //     if(!Hash::check($req->password,$currentUser->password))
+    //         return response()->json(['status' => false, 'message' => 'Password is wrong!']);
 
-        //check if wallet id is taken
-        $user = User::where('wallet_id',$req->wallet_id)->first();
+    //     //check if wallet id is taken
+    //     $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id_old)->first();
+    //     //user wallet is not found
+    //     if(!$user_wallets)
+    //         return response()->json(['status' => false, 'message' => 'Wallet ID not found!']);
 
-        if($user->wallet_id==$req->wallet_id)
-            return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+    //     $userid = $user_wallets->user_id;
 
-        if($user)
-            return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
+    //          //check if wallet id is taken
+    //     $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id)->first();
 
-        //set wallet id
-        $currentUser->wallet_id=$req->wallet_id;
-        $currentUser->save();
+    //     if(!$user_wallets){
+    //         //pluck wallet_id
+    //         $wallets = User_Wallets::where('user_id',$userid)->get()->pluck('wallet_id');
 
-        return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
-    }
+    //         //check if wallet id is taken
+    //         if($wallets->contains($req->wallet_id))
+    //             return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+    //         else{
+    //             //create new user wallet
+    //             $user_wallets = User_Wallets::create([
+    //                 'user_id' => $userid,
+    //                 'wallet_id' => $req->wallet_id,
+    //             ]);
+    //             return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+    //         }
+            
+    //     }else
+    //         return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
+        
+
+    //     // if($user_wallets->wallet_id==$req->wallet_id)
+    //     //     return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
+
+    //     // if($user_wallets)
+    //     //     return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
+
+    // }
 
     //create TransactionRequest
     public function createTransactionRequest(Request $req){
@@ -679,10 +762,13 @@ class ApiMainController extends Controller
         $req->validate(
             [
                 'transaction_id' => 'required|string',
+                'user_tran_id' => 'required|string',
             ],
             [
                 'transaction_id.required' => 'Transaction ID cannot be empty!',
                 'transaction_id.string' => 'Transaction ID can only consist of letters!',
+                'user_tran_id.required' => 'user_tran_id ID cannot be empty!',
+                'user_tran_id.string' => 'user_tran_id ID can only consist of letters!',
             ]
         );
 
@@ -704,9 +790,82 @@ class ApiMainController extends Controller
         //create transaction request
         $transactionRequest=transaction_request::create([
             'transaction_id' => $req->transaction_id,
+            'own_transaction_id' => $req->user_tran_id,
         ]);
+        $this->sendNotification($transaction->user_id,"Transaction Request","Transaction Request is created!",$transactionRequest->id);
 
         return response()->json(['status' => true, 'message' => 'Transaction Request created!']);
+    }
+
+    public function addWalletId(Request $req){
+
+        //validate wallet id
+        $req->validate(
+            [
+                'wallet_id' => 'required|string',
+                'user_id' => 'required',
+            ],
+            [
+                'wallet_id.required' => 'Wallet ID cannot be empty!',
+                'wallet_id.string' => 'Wallet ID can only consist of letters!',
+                'user_id.required' => 'User ID cannot be empty!',
+            ]
+        );
+
+        //check if wallet id is taken
+        $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id)->first();
+
+        if($user_wallets)
+            return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
+
+        $user=User::find($req->user_id);
+
+        if(!$user)
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+
+        //create new user wallet
+        $user_wallets = User_Wallets::create([
+            'user_id' => $user->id,
+            'wallet_id' => $req->wallet_id,
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Wallet ID added!']);
+    }
+
+    //remove walllet id
+    public function removeWalletId(Request $req){
+
+        //validate wallet id
+        $req->validate(
+            [
+                'wallet_id' => 'required|string',
+                'user_id' => 'required',
+            ],
+            [
+                'wallet_id.required' => 'Wallet ID cannot be empty!',
+                'wallet_id.string' => 'Wallet ID can only consist of letters!',
+                'user_id.required' => 'User ID cannot be empty!',
+            ]
+        );
+
+        //check if wallet id is taken
+        $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id)->first();
+
+        if(!$user_wallets)
+            return response()->json(['status' => false, 'message' => 'Wallet ID not found!']);
+
+        $user=User::find($req->user_id);
+
+        if(!$user)
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+
+        if($user->id!=$user_wallets->user_id)
+            return response()->json(['status' => false, 'message' => 'Wallet ID not found!']);
+
+        //delete user wallet
+        $user_wallets->delete();
+
+        return response()->json(['status' => true, 'message' => 'Wallet ID removed!']);
     }
 
 }

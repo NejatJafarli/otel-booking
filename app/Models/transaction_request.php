@@ -13,6 +13,7 @@ class transaction_request extends Model
     //fillable
     protected $fillable = [
         'transaction_id',
-        'status'
+        'status',
+        "own_transaction_id"
     ];
 }

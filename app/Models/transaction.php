@@ -22,7 +22,8 @@ class transaction extends Model
         "transaction_id",
         "status",
         "room_password",
-        "hotel_id"
+        "hotel_id",
+        'user_id'
     ];
 
 
