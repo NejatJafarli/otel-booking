@@ -16,4 +16,10 @@ class transaction_request extends Model
         'status',
         "own_transaction_id"
     ];
+
+    //transaction
+    public function transaction()
+    {
+        return $this->belongsTo(transaction::class);
+    }
 }

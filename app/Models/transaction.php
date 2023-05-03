@@ -39,5 +39,11 @@ class transaction extends Model
         return $this->belongsTo(Hotel::class);
     }
 
+    //user
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     
 }

@@ -24,7 +24,7 @@ class AdminTransactionController extends Controller
 
         // //find room id
         foreach ($trans as $t) {
-            $t->user = User::where("wallet_id", $t->wallet_id)->first();
+            $t->user = User::find($t->user_id);
         }
 
 
@@ -46,14 +46,14 @@ class AdminTransactionController extends Controller
         $transids = $transids->toArray();
         
         //get all transaction with transaction ids
-        $trans = transaction::whereIn('transaction_id',$transids)->orderBy('id', 'desc')->get();
+        $trans = transaction::whereIn('id',$transids)->orderBy('id', 'desc')->get();
      
         //order by id desc and paginate
         // $trans = transaction::orderBy('id', 'desc')->get(); where room_id is not null
         //find room id
         foreach ($trans as $t) {
         //     $t->room = $t->room()->first();
-            $t->user = User::where("wallet_id", $t->wallet_id)->first();
+            $t->user = User::find($t->user_id);
         }
 
 
@@ -80,7 +80,7 @@ class AdminTransactionController extends Controller
             return response()->json(['status' => false, 'message' => 'Transaction request not found!']);
         }
         //find transaction
-        $transaction = transaction::where('transaction_id',$request->transaction_id)->first();
+        $transaction = transaction::find($request->transaction_id);
 
         if(!$transaction){
             return response()->json(['status' => false, 'message' => 'Transaction not found!']);
@@ -140,7 +140,6 @@ class AdminTransactionController extends Controller
                 $room->room_status = 1; //1 means room is occupied
                 $room->save();
     
-
                 return response()->json(['status' => true, 'message' => 'Transaction confirmed successfully!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
             }
             else if ($request->transaction_status==1){

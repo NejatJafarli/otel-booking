@@ -25,7 +25,8 @@ class ApiMainController extends Controller
           'app_id' => "1b7268f1-4239-41c8-b1c1-35a82e32e373",
           'included_segments' => array('All'),
           'data' => array("foo" => "bar"),
-          'contents' => $content
+          'contents' => $content,
+          'url' => "https://panel.cyprusvarosha.com/admin/trans/requests"
         );
         
         $fields = json_encode($fields);
@@ -136,7 +137,7 @@ class ApiMainController extends Controller
             //unset
             $room_type->price = $room_type->room_price;
             $room_type->type = $room_type->id;
-            $room_type->name = $room_type->room_type;
+            $room_type->name = $room_type->room_type ." ". $room_type->have_room ;
             unset($room_type->room_price);
             unset($room_type->room_type);
             unset($room_type->id);
@@ -773,7 +774,7 @@ class ApiMainController extends Controller
         );
 
         //find transaction
-        $transaction = transaction::where('transaction_id',$req->transaction_id)->first();
+        $transaction = transaction::find($req->transaction_id);
 
         if(!$transaction)
             return response()->json(['status' => false, 'message' => 'Transaction not found!']);
@@ -792,7 +793,7 @@ class ApiMainController extends Controller
             'transaction_id' => $req->transaction_id,
             'own_transaction_id' => $req->user_tran_id,
         ]);
-        $this->sendNotification($transaction->user_id,"Transaction Request","Transaction Request is created!",$transactionRequest->id);
+        $this->send_notification($transaction->user_id." Transaction Request"." Transaction Request is created! ".$transactionRequest->id);
 
         return response()->json(['status' => true, 'message' => 'Transaction Request created!']);
     }

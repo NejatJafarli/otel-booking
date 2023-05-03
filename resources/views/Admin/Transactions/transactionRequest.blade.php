@@ -115,13 +115,13 @@
                                         <td><span class="badge bg-warning">Onay Bekliyor</span></td>
 
                                         <td class="text-right">
-                                            <button onclick="ConfirmTranOrReject('{{ $tran->transaction_id }}',0)"
+                                            <button onclick="ConfirmTranOrReject('{{ $tran->id }}',0)"
                                                 type="button" class="btn btn-xs btn-success btn-icon"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                 <i class="link-icon" data-feather="check"></i>
                                             </button>
 
-                                            <button onclick="ConfirmTranOrReject('{{ $tran->transaction_id }}',1)"
+                                            <button onclick="ConfirmTranOrReject('{{ $tran->id }}',1)"
                                                 type="button" class="btn btn-xs btn-danger btn-icon">
                                                 <i class="link-icon" data-feather="x"></i>
                                             </button>
