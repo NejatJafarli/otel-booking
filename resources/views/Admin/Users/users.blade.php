@@ -82,9 +82,6 @@
                                                         required)</label>
                                                     <input type="email" class="form-control" id="email" name="email"
                                                         value="{{ old('email') }}">
-                                                    <label for="email" class="form-label">Kullanici Wallet Id</label>
-                                                    <input type="text" class="form-control" id="wallet_id"
-                                                        name="wallet_id" value="{{ old('wallet_id') }}">
                                                     <label for="email" class="form-label">Kullanici Karakter
                                                         Secimi</label>
                                                     <input type="number" class="form-control" id="char_number"
@@ -108,7 +105,6 @@
                                 <tr>
                                     <th class="pt-0">#</th>
                                     <th class="pt-0">Kullanici Adi</th>
-                                    <th class="pt-0">Wallet Id</th>
                                     <th class="pt-0">Kullanici Emaili</th>
                                     <th class="pt-0">Kullanici Kayit Tarihi</th>
                                     <th class="pt-0">Action</th>
@@ -120,13 +116,12 @@
                                     <tr>
                                         <td>{{ $user->id }}</td>
                                         <td><a href={{route("userDetail",$user->id)}}>{{ $user->username }}</a></td>
-                                        <td>{{ $user->wallet_id }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{ $user->created_at }}</td>
                                         <td class="text-right">
                                             <button
                                                 onclick="editUser(
-                                                    { id:{{ $user->id }},username:'{{$user->username}}',wallet_id:'{{ $user->wallet_id }}',email:'{{ $user->email }}',char_number:'{{ $user->character_number }}' })"
+                                                    { id:{{ $user->id }},username:'{{$user->username}}',email:'{{ $user->email }}',char_number:'{{ $user->character_number }}' })"
                                                 type="button" class="btn btn-xs btn-primary btn-icon"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                 <i class="link-icon" data-feather="edit"></i>
@@ -167,10 +162,7 @@
                             required)</label>
                         <input type="email" class="form-control" id="edit_email" name="email"
                             value="{{ old('email') }}">
-                        <label for="email" class="form-label">Kullanici Wallet Id</label>
-                        <input type="text" class="form-control" id="edit_wallet_id"
-                            name="wallet_id" value="{{ old('wallet_id') }}">
-                        <label for="email" class="form-label">Kullanici Karakter
+x                        <label for="email" class="form-label">Kullanici Karakter
                             Secimi</label>
                         <input type="number" class="form-control" id="edit_char_number"
                             name="char_number" value="{{ old('char_number') }}">
@@ -247,9 +239,6 @@
 
             let email = document.getElementById('edit_email');
             email.value = json.email;
-
-            let wallet_id = document.getElementById('edit_wallet_id');
-            wallet_id.value = json.wallet_id;
 
             console.log(json);
             let char_number = document.getElementById('edit_char_number');

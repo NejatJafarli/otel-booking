@@ -117,6 +117,12 @@ License: For each use you must have a valid license purchased only from above li
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('onlineUsers') }}" class="nav-link">
+                            <i class="link-icon" data-feather="users"></i>
+                            <span class="link-title">Kullanicilar(ONLINE)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('admins') }}" class="nav-link">
                             <i class="link-icon" data-feather="users"></i>
                             <span class="link-title">Adminler</span>

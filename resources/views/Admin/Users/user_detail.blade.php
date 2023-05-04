@@ -134,7 +134,6 @@
                                     <td>{{ $tran->transaction_amount }}</td>
                                     <td>{{ date('d-m-Y  H:i:s ', strtotime($tran->check_in_date)) }}</td>
                                     <td>{{ date('d-m-Y  H:i:s ', strtotime($tran->check_out_date)) }}</td>
-                                    <td>{{ $tran->room()->first()->room_type()->first()->room_price }}</td>
                                     @if ($tran->transaction_status == 0)
                                         <td><span class="badge bg-success">Onaylandi</span></td>
                                     @elseif($tran->transaction_status == 2)

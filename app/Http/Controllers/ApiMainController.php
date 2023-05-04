@@ -119,7 +119,7 @@ class ApiMainController extends Controller
         
         return response()->json(['status' => true, 'option_names' => $array ,"prices"=>$priceArray,"eth_prices"=>$priceEthArray,"eth_pricesfloat"=>$priceEthArrayFloat]);
     }
-    //
+    
     public function getUser($id)
     {
         $user = User::find($id);
@@ -137,7 +137,7 @@ class ApiMainController extends Controller
             //unset
             $room_type->price = $room_type->room_price;
             $room_type->type = $room_type->id;
-            $room_type->name = $room_type->room_type ." ". $room_type->have_room ;
+            $room_type->name = $room_type->room_type ." (". $room_type->have_room." Room)" ;
             unset($room_type->room_price);
             unset($room_type->room_type);
             unset($room_type->id);
@@ -298,19 +298,32 @@ class ApiMainController extends Controller
 
     public function setRoomPassword(Request $req){
 
-        //validate room id and password
-        $req->validate(
-            [
-                'room_number' => 'required|integer',
-                'password' => 'string',
-            ],
-            [
-                'room_number.required' => 'Room number field cannot be left blank!',
-                'room_number.integer' => 'Room number can only consist of numbers!',
-                'password.required' => 'Password field cannot be left blank!',
-                'password.string' => 'Password must be string!',
-            ]
-        );
+        //validate room id and password username user_pass
+        $req->validate([
+            'room_number' => 'required|integer',
+            'password' => 'required|string',
+            'user_id'=>'required',
+            'user_pass'=>'required|string'
+        ],
+        [
+            'room_number.required' => 'Room number field cannot be left blank!',
+            'room_number.integer' => 'Room number can only consist of numbers!',
+            'password.required' => 'Password field cannot be left blank!',
+            'password.string' => 'Password can only consist of letters!',
+            'username.required' => 'Username field cannot be left blank!',
+            'username.string' => 'Username can only consist of letters!',
+            'user_id.required' => 'User password field cannot be left blank!',
+        ]);
+
+        //check if user exists4
+        $user = User::find($req->user_id);
+        if(!$user){
+            return response()->json(['status' => false, 'message' => 'User not found!']);
+        }
+
+        //check if user password is correct
+        if(!Hash::check($req->user_pass,$user->password))
+            return response()->json(['status' => false, 'message' => 'User password is incorrect!']);
 
         // find room
         $room = room::where('room_number',$req->room_number)->first();

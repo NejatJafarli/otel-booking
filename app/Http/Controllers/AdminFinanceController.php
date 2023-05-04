@@ -59,7 +59,7 @@ class AdminFinanceController extends Controller
 
     private function moneyAmerican($amount)
 {
-    $regex = $amount / 100;
+    $regex = $amount;
     $usd = number_format($regex, 2, '.', ',');
     return "$ ".$usd;
 }

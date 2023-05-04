@@ -150,7 +150,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Evet, sil!',
+                    confirmButtonText: 'Evet, onayla!',
                     cancelButtonText: 'Hayir, iptal et!'
                 }).then((result) => {
                     if (result.isConfirmed) {

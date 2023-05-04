@@ -243,7 +243,7 @@
                     labelFontSize: 11
                 },
                 axisY: {
-                    title: "TL Değeri",
+                    title: "USD Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
                     labelFontColor: "#ffbc00",
@@ -256,7 +256,7 @@
                     dataPoints: MyData.map(function(item) {
                         console.log(item);
                         var amount = isNaN(item.amount) ? 0 : parseFloat(item.amount);
-                        amount = amount / 100;
+                        amount = amount;
                         // amount is 330000
                         //convert it to 3300.00 
                         let count = item.count;
@@ -269,7 +269,7 @@
                             year: "numeric"
                         });
 
-                        let string = count + " Adet Satildi Toplam Tutar : " + amount + " ₺";
+                        let string = count + " Adet Satildi Toplam Tutar : $ " + amount;
                         //add date to string
                         string = dateString + " => " + string;
 
@@ -296,7 +296,7 @@
                     labelFontSize: 11
                 },
                 axisY: {
-                    title: "TL Değeri",
+                    title: "USD Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
                     labelFontColor: "#ffbc00",
@@ -308,7 +308,7 @@
                     valueFormatSting: "#,###,.## ₺",
                     dataPoints: MyData.map(function(item) {
                         var amount = isNaN(item.amount) ? 0 : parseFloat(item.amount);
-                        amount = amount / 100;
+                        amount = amount;
                         // amount is 330000
                         //convert it to 3300.00 
                         let count = item.count;
@@ -321,7 +321,7 @@
                             year: "numeric"
                         });
 
-                        let string = count + " Adet Satildi Toplam Tutar : " + amount + " ₺";
+                        let string = count + " Adet Satildi Toplam Tutar : $ " + amount;
                         //add date to string
                         string = dateString + " => " + string;
 
@@ -345,7 +345,7 @@
                     fontColor: "#ffbc00",
                 },
                 axisY: {
-                    title: "TL Değeri",
+                    title: "USD Değeri",
                     titleFontSize: 24,
                     valueFormatSting: "#,###,.## ₺",
                     labelFontColor: "#ffbc00",
@@ -362,7 +362,7 @@
                     dataPoints: MyData.map(function(item) {
                         console.log(item);
                         var amount = isNaN(item.amount) ? 0 : parseFloat(item.amount);
-                        amount = amount / 100;
+                        amount = amount;
                         // amount is 330000
                         //convert it to 3300.00 
                         let count = item.count;
@@ -375,7 +375,7 @@
                             year: "numeric"
                         });
 
-                        let string = count + " Adet Satildi Toplam Tutar : " + amount + " ₺";
+                        let string = count + " Adet Satildi Toplam Tutar : $ " + amount;
                         //add date to string
                         string = dateString + " => " + string;
 

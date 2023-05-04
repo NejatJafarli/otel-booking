@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\transaction;
 use App\Models\User;
+use App\Models\User_Wallets;
 use Illuminate\Http\Request;
 
 class AdminUserController extends Controller
@@ -25,15 +26,12 @@ class AdminUserController extends Controller
         $req->validate(
             [
                 'username' => 'required| max:255|string',
-                "wallet_id"=>"required|string",
                 "char_number"=>"required|integer"
             ],
             [
                 'username.required' => 'Kullanıcı adı boş bırakılamaz!',
                 'username.max' => 'Kullanıcı adı 255 karakterden fazla olamaz!',
                 'username.string' => 'Kullanıcı adı string olmalı!',
-                'wallet_id.required' => 'Cüzdan ID boş bırakılamaz!',
-                'wallet_id.string' => 'Cüzdan ID string olmalı!',
                 'char_number.required' => 'Karakter sayısı boş bırakılamaz!',
                 'char_number.integer' => 'Karakter sayısı integer olmalı!'
             ]
@@ -53,7 +51,6 @@ class AdminUserController extends Controller
         User::create([
             "username" => $req->username,
             "email" => $req->email,
-            "wallet_id" => $req->wallet_id,
             "character_number"=>$req->char_number
         ]);
 
@@ -83,7 +80,6 @@ class AdminUserController extends Controller
         $req->validate(
             [
                 'username' => 'required|max:255|string',
-                "wallet_id"=>"required|string",
                 "char_number"=>"required|integer"
             ],
             [
@@ -91,8 +87,6 @@ class AdminUserController extends Controller
                 'username.max' => 'Kullanıcı adı 255 karakterden fazla olamaz!',
                 'username.string' => 'Kullanıcı adı string olmalı!',
                 'email.string' => 'Email string olmalı!',
-                'wallet_id.required' => 'Cüzdan ID boş bırakılamaz!',
-                'wallet_id.string' => 'Cüzdan ID string olmalı!',
                 'char_number.required' => 'Karakter sayısı boş bırakılamaz!',
                 'char_number.integer' => 'Karakter sayısı integer olmalı!'
             ]
@@ -115,7 +109,6 @@ class AdminUserController extends Controller
         $user->update([
             "username" => $req->username,
             "email" => $req->email,
-            "wallet_id" => $req->wallet_id,
             "character_number"=>$req->char_number
         ]);
 
@@ -129,9 +122,22 @@ class AdminUserController extends Controller
     public function userDetail($id){
         $user = User::find($id);
 
+
+
         //get user transactions
-        $userRoomTrans=transaction::where("wallet_id", $user->wallet_id)->where("hotel_id",null)->get();
-        $userHotelTrans=transaction::where("wallet_id", $user->wallet_id)->where("room_id",null)->get();
+        $userRoomTrans=transaction::where("user_id", $user->id)->where("hotel_id",null)->get();
+        $userHotelTrans=transaction::where("user_id", $user->id)->where("room_id",null)->get();
+
+        $userWallets=User_Wallets::where("user_id", $user->id)->get();
+
+        $wallets=array();
+        foreach($userWallets as $wallet){
+            $wallets[]=$wallet->wallet_id;
+        }
+
+        $userWallets=implode(",",$wallets);
+
+        $user->wallet_id=$userWallets;
 
         return view('Admin/Users/user_detail',['user' => $user, 'userRoomTrans' => $userRoomTrans, 'userHotelTrans' => $userHotelTrans]);
     }

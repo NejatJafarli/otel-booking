@@ -199,16 +199,17 @@
                                                     ->first();
                                                 $now = date('Y-m-d H:i:s');
                                                 // //check transaction end date
-                                                if ($transaction && $transaction->check_out_date >= $now) {
+                                                if ($transaction && $transaction->check_out_date <= $now) {
                                                     $transaction = null;
                                                 }
                                                 
                                                 $in_date = $out_date = $user = '';
                                                 if ($transaction) {
+
                                                     $in_date = $transaction->check_in_date;
                                                     $out_date = $transaction->check_out_date;
 
-                                                    $userid=User_Wallets::where('wallet_id', $transaction->wallet_id)->first()->id
+                                                    $userid=User_Wallets::where('wallet_id', $transaction->wallet_id)->first()->user_id;
                                                     $user = User::find($userid);
                                                 }
                                                 //use model user
@@ -432,6 +433,8 @@
                         [0, "desc"]
                     ]
                 });
+
+
                 $('#MyDataTable').each(function() {
                     var datatable = $(this);
                     // SEARCH - Add the placeholder for Search and Turn this into in-line form control

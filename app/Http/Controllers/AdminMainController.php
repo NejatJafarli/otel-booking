@@ -14,4 +14,9 @@ class AdminMainController extends Controller
     {
         return view('Admin/Main/dashboard');
     }
+
+    public function onlineUsers(){
+        return view('Admin/Main/OnlineUsers');
+
+    }
 }

@@ -34,16 +34,17 @@
 
     @section('js')
      <script>
-  var socket = io.connect('https://cyprusvarosha.com');
-  
-   window.addEventListener('load', function () {
-   socket.on("RECEIVE_USER_COUNT",(count)=>{
-     let message = document.getElementById('onlineUsers');
-    message.innerHTML = count;  
-   
-   })
-    socket.emit('GET_USER_COUNT');
-  });
+        var socket = io.connect('https://cyprusvarosha.com');
+            
+         window.addEventListener('load', function () {
+         socket.on("RECEIVE_USER_COUNT",(count)=>{
+            console.log(count);
+           let message = document.getElementById('onlineUsers');
+          message.innerHTML = count;  
+        
+         })
+          socket.emit('GET_USER_COUNT');
+        });
   </script>
 
     @endsection
