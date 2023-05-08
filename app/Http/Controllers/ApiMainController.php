@@ -303,15 +303,12 @@ class ApiMainController extends Controller
             'room_number' => 'required|integer',
             'password' => 'required|string',
             'user_id'=>'required',
-            'user_pass'=>'required|string'
         ],
         [
             'room_number.required' => 'Room number field cannot be left blank!',
             'room_number.integer' => 'Room number can only consist of numbers!',
             'password.required' => 'Password field cannot be left blank!',
             'password.string' => 'Password can only consist of letters!',
-            'username.required' => 'Username field cannot be left blank!',
-            'username.string' => 'Username can only consist of letters!',
             'user_id.required' => 'User password field cannot be left blank!',
         ]);
 
@@ -320,10 +317,6 @@ class ApiMainController extends Controller
         if(!$user){
             return response()->json(['status' => false, 'message' => 'User not found!']);
         }
-
-        //check if user password is correct
-        if(!Hash::check($req->user_pass,$user->password))
-            return response()->json(['status' => false, 'message' => 'User password is incorrect!']);
 
         // find room
         $room = room::where('room_number',$req->room_number)->first();
@@ -343,6 +336,11 @@ class ApiMainController extends Controller
         if($transaction->transaction_status != 0){
             return response()->json(['status' => false, 'message' => 'This transaction is not confirmed']);
         }
+
+        if($transaction->user_id != $user->id){
+            return response()->json(['status' => false, 'message' => 'This transaction does not belong to this user!']);
+        }
+        
 
         $transaction->room_password = Hash::make($req->password);
 
@@ -657,6 +655,18 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Username is taken!']);
 
         //create user
+
+
+        //check username validations like latin chars and numbers only etc.
+        $regex = "/^[a-zA-Z0-9]+$/";
+        if(!preg_match($regex, $req->username))
+            return response()->json(['status' => false, 'message' => 'Username can only consist of letters and numbers!']);
+
+        //don't allow to use space
+        if(strpos($req->username, ' ') !== false)
+            return response()->json(['status' => false, 'message' => 'Username cannot contain spaces!']);
+
+        
         $user=User::create([
             'username' => $req->username,
             'password' => Hash::make($req->password),

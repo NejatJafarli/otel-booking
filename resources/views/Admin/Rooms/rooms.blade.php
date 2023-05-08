@@ -202,6 +202,9 @@
                                                 if ($transaction && $transaction->check_out_date <= $now) {
                                                     $transaction = null;
                                                 }
+                                                if($room->room_status==0){
+                                                    $transaction=null;
+                                                }
                                                 
                                                 $in_date = $out_date = $user = '';
                                                 if ($transaction) {
@@ -229,6 +232,15 @@
                                                     data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                     <i class="link-icon" data-feather="edit"></i>
                                                 </button>
+                                                @if ($room->room_status == 1)
+                                                <button
+                                                    onclick="editTran(
+                                                    { id:{{ $room->transaction_id }}})"
+                                                    type="button" class="btn btn-xs btn-primary btn-icon"
+                                                    data-bs-toggle="modal" data-bs-target="#exampleModal4">
+                                                    <i class="link-icon" data-feather="edit"></i>
+                                                </button>
+                                                @endif
 
                                                 <button onclick="deleteRoom({{ $room->id }})" type="button"
                                                     class="btn btn-xs btn-danger btn-icon">
@@ -246,38 +258,27 @@
         </div>
 
         {{-- edit modal --}}
-        <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2"
+        <div class="modal fade" id="exampleModal4" tabindex="-1" aria-labelledby="exampleModalLabel4"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Oda Ekle</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Oda Sifresi</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     {{-- action="{{ route('CreateRoom') }}" method="POST" --}}
                     <form>
-                        <input type="hidden" id="edit_id">
+                        <input type="hidden" id="edit_tran_id">
                         <div class="modal-body">
                             @csrf
                             <div class="mb-3">
-                                <label for="room_number" class="form-label">Oda Numarasi</label>
-                                <input type="text" class="form-control" id="edit_room_number">
-                            </div>
-                            <div class="mb-3">
-                                <label for="room_type" class="form-label">Oda Turu</label>
-                                <select class="form-select" aria-label="Default select example" id="edit_room_type">
-                                    @foreach ($types as $type)
-                                        <option value="{{ $type->id }}"
-                                            @if ($selected == $type->id) selected @endif>
-                                            {{ $type->room_type }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label for="room_number" class="form-label">Oda Sifresi</label>
+                                <input type="text" class="form-control" id="edit_tran_room_pass">
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button onclick="ConfirmEdit()" type="button" class="btn btn-primary">Kaydet</button>
+                            <button onclick="ConfirmPass()" type="button" class="btn btn-primary">Kaydet</button>
                         </div>
                     </form>
                 </div>
@@ -285,7 +286,69 @@
         </div>
     </div>
 
+    
+
     <script>
+        function editTran(json) {
+            console.log(json);
+            $('#edit_tran_id').val(json.id);
+
+        }
+
+        function ConfirmPass(){
+            swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu islem geri alinamaz!",
+                icon: 'warning',
+                //change content color
+                customClass: {
+                    content: 'text-dark'
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, degistir!',
+                cancelButtonText: 'Hayir, iptal et!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //ajax ile silme islemi
+                    let data = {
+                        _token: "{{ csrf_token() }}",
+                        id: $('#edit_tran_id').val(),
+                        password: $('#edit_tran_room_pass').val(),
+                    }
+                    console.log(data);
+                    $.ajax({
+                        type: "POST",
+                        data: data,
+                        url: "{{ route('editTranPass') }}",
+                        success: function(response) {
+                            console.log(response);
+                            if (response.status) {
+                                Swal.fire(
+                                    'Degistirildi!',
+                                    'Oda Sifresi basariyla degistirildi.',
+                                    'success'
+                                ).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Hata!',
+                                    'Oda Sifresi degistirilemedi.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+
+        }
+
+        
         function deleteRoom(id) {
             //swal ile silme onayi
             swal.fire({

@@ -123,6 +123,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         Route::post('/edit', [AdminHotelController::class, 'editHotel'])->name('editHotel');
     });
     //route prefix user
+    Route::get('/chatLog', [AdminMainController::class, 'chatLog'])->name('chatLog');
     Route::get('/onlineUsers', [AdminMainController::class, 'onlineUsers'])->name('onlineUsers');
     Route::group(['prefix' => 'users'], function () {
         Route::get('/{id}', [AdminUserController::class, 'userDetail'])->name('userDetail');
@@ -142,6 +143,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
         Route::get('', [AdminTransactionController::class, 'trans'])->name('trans');
         Route::get('/requests', [AdminTransactionController::class, 'trans_request'])->name('trans_request');
         Route::post('/confirmOrRejectTransaction', [AdminTransactionController::class, 'confirmOrRejectTransaction'])->name('confirmOrRejectTransaction');
+        Route::post('/editTranPass', [AdminTransactionController::class, 'editTranPass'])->name('editTranPass');
     });
 
     

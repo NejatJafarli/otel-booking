@@ -4,6 +4,28 @@
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
         integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous">
     </script>
+    <style>
+        .chat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: black;
+            border-radius: 10px;
+            max-width: 1200px;
+            height: 600px;
+            overflow-y: scroll;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+    </style>
 @endsection
 @section('content')
     <div class="row flex-grow-1">
@@ -85,6 +107,7 @@
                                         <th class="pt-0">Kullanici Id</th>
                                         <th class="pt-0">Kullanici Adi</th>
                                         <th class="pt-0">Wallet Id </th>
+                                        <th class="pt-0">Open Chat </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,6 +202,36 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="exampleModal5" tabindex="-1" aria-labelledby="exampleModalLabel5"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Mesaj Gonder</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    {{-- action="{{ route('CreateRoom') }}" method="POST" --}}
+                    <form>
+                        <div class="modal-body">
+                            @csrf
+                            <div class="mb-3">
+                                <div class="chat" id="MainChat">
+
+                                </div>
+                                {{-- //text area message --}}
+                                <label for="message-text" class="col-form-label">Mesaj:</label>
+                                <textarea class="form-control" id="message-text-five"></textarea>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button onclick="SendMessage()" type="button" class="btn btn-primary">Gonder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endsection
     @section('js')
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -190,22 +243,108 @@
             // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
             var socket = io.connect('https://cyprusvarosha.com');
 
-            let SelectedId = null;
+            socket.emit("JOIN_ADMIN")
 
-            function SetId(id) {
-                SelectedId = id;
+            // let SelectedId = null;
+            let currentChatId = null;
+            socket.on("CHAT_CREATED", (chatid, messages) => {
+
+                console.log(chatid, messages);
+                let CurrentMessages=messages.map(x => x.message)
+                currentChatId = chatid;
+                let chat = document.getElementById('MainChat');
+                chat.innerHTML = '';
+                //foreach messages created divs set class to message and innerText=message.message
+                CurrentMessages.forEach(x => {
+                    let div = document.createElement('div');
+                    div.classList.add('message');
+                    div.innerText = x;
+                    chat.appendChild(div);
+                });
+
+                $('#exampleModal5').modal('show');
+            })
+
+            socket.on("CHAT_CLOSED", chatid => {
+                console.log(chatid, currentChatId);
+                if (currentChatId == chatid) {
+                    $('#exampleModal5').modal('hide');
+                    alert('Sohbet kapatildi');
+                }
+            })
+
+            socket.on("CHAT_MESSAGE_RECEIVED", (chatid, message) => {
+                if (currentChatId == null) return;
+                
+                if (currentChatId == chatid) {
+                    let chat = document.getElementById('MainChat');
+                    let div = document.createElement('div');
+                    div.classList.add('message');
+                    div.innerText = message;
+                    chat.appendChild(div);
+                }
+            })
+
+            function CloseChat() {
+                if (currentChatId == null) {
+                    alert('Once bir sohbet aciniz');
+                    return;
+                }
+                let data = {
+                    chat_id: currentChatId
+                }
+
+                //make string
+
+                let string = JSON.stringify(data);
+
+                socket.emit('CLOSE_CHAT', string);
+                currentChatId=null;
             }
+
+            function CreateChat(otherUserId) {
+                // SelectedId = id;
+                if (currentChatId != null) {
+                    alert('Onceki sohbeti kapatmadan yeni sohbet acamazsiniz');
+                    return;
+                }
+
+                let data = {
+                    id_two: otherUserId
+                }
+                //socket emit ADMIN_CHAT
+                socket.emit('ADMIN_CHAT', data);
+            }
+
+
 
             function SendMessage() {
-                let message = document.getElementById('message-text').value;
-                let id = SelectedId;
-                let data = {
-                    message: message,
-                    id: id
+                let message = document.getElementById('message-text-five');
+
+                //get textarea  value
+                
+                console.log(message.value);
+                if (message.value == '') {
+                    alert('Lutfen mesaj giriniz');
+                    return;
                 }
-                socket.emit('SEND_SPECIFIC_MESSAGE', data);
-                $('#exampleModal2').modal('hide');
+                let data = {
+                    message: "<color=yellow>Server:<color=white> " + message.value,
+                    chatid: currentChatId
+                }
+                let dataStr = JSON.stringify(data);
+                socket.emit('SEND_MESSAGE_TO_CHAT', dataStr);
+                message.value = '';
+
             }
+            //     let id = SelectedId;
+            //     let data = {
+            //         message: message,
+            //         id: id
+            //     }
+            //     socket.emit('SEND_SPECIFIC_MESSAGE', data);
+            //     $('#exampleModal2').modal('hide');
+            // }
 
             function BroadCastMessage() {
                 let message = document.getElementById('message-text-three');
@@ -240,9 +379,11 @@
                     return;
                 }
                 selecteds.forEach(element => {
+
+                    console.log(element.getAttribute('data-id'));
                     socket.emit('SEND_SPECIFIC_MESSAGE', {
                         message: message,
-                        id: element.getAttribute('data-id')
+                        id: element.getAttribute('data-id').toString()
                     });
                 });
 
@@ -302,9 +443,8 @@
                         let count = $('#MyDataTable').DataTable().rows().count();
                         data.forEach(element => {
                             let html = `<button
-                            onclick="SetId(\'` + element.id + `\')"
-                            type="button" class="btn btn-xs btn-primary btn-icon"
-                            data-bs-toggle="modal" data-bs-target="#exampleModal2">
+                            onclick="CreateChat(\'` + element.user_id + `\')"
+                            type="button" class="btn btn-xs btn-primary btn-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                              viewBox="0 0 24 24" fill="none" stroke="currentColor"
                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -319,6 +459,7 @@
                                 element.id,
                                 element.name,
                                 element.wallet_id,
+                                html
                             ]).draw();
                         });
                     });
@@ -329,9 +470,8 @@
                         console.log(data.name + " connected");
                         let count = $('#MyDataTable').DataTable().rows().count();
                         let html = `<button
-                            onclick="SetId(\'` + data.id + `\')"
-                            type="button" class="btn btn-xs btn-primary btn-icon"
-                            data-bs-toggle="modal" data-bs-target="#exampleModal2">
+                            onclick="CreateChat(\'` + data.user_id + `\')"
+                            type="button" class="btn btn-xs btn-primary btn-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                              viewBox="0 0 24 24" fill="none" stroke="currentColor"
                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -344,6 +484,7 @@
                             data.id,
                             data.name,
                             data.wallet_id,
+                            html
                         ]).draw();
                     })
                     socket.on("NEW_USER_DISCONNECTED", id => {

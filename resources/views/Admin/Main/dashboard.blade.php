@@ -1,13 +1,11 @@
 @extends('layout/master')
-
 @section('header')
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
-    integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous">
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous">
     </script>
 @endsection
-@section("content")
-
-<div class="row flex-grow-1">
+@section('content')
+    <div class="row flex-grow-1">
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
@@ -29,22 +27,20 @@
             </div>
         </div>
     </div>
-</div
 @endsection
 
-    @section('js')
-     <script>
+@section('js')
+    <script>
         var socket = io.connect('https://cyprusvarosha.com');
-            
-         window.addEventListener('load', function () {
-         socket.on("RECEIVE_USER_COUNT",(count)=>{
-            console.log(count);
-           let message = document.getElementById('onlineUsers');
-          message.innerHTML = count;  
-        
-         })
-          socket.emit('GET_USER_COUNT');
-        });
-  </script>
 
-    @endsection
+        window.addEventListener('load', function() {
+            socket.on("RECEIVE_USER_COUNT", (count) => {
+                console.log(count);
+                let message = document.getElementById('onlineUsers');
+                message.innerHTML = count;
+
+            })
+            socket.emit('GET_USER_COUNT');
+        });
+    </script>
+@endsection

@@ -1,6 +1,9 @@
 @extends('layout/master')
 @section('header')
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous">
+    </script>
 @endsection
 @section('content')
     <div class="row flex-grow-1">
@@ -93,7 +96,7 @@
                                         @endif
                                         {{-- //tranactions status with badge  --}}
 
-                                        <td>{{ $tran->transaction_id }}</td>
+                                        <td>{{ $tran->tran_id }}</td>
                                         {{-- <td>{{$tran->created_at}}</td> created at is 
                                         2023-04-18 
                                         18-04-2023
@@ -115,13 +118,15 @@
                                         <td><span class="badge bg-warning">Onay Bekliyor</span></td>
 
                                         <td class="text-right">
-                                            <button onclick="ConfirmTranOrReject('{{ $tran->id }}',0)"
+                                            <button
+                                                onclick="ConfirmTranOrReject('{{ $tran->id }}',0,'{{ $tran->user_id }}')"
                                                 type="button" class="btn btn-xs btn-success btn-icon"
                                                 data-bs-toggle="modal" data-bs-target="#exampleModal2">
                                                 <i class="link-icon" data-feather="check"></i>
                                             </button>
 
-                                            <button onclick="ConfirmTranOrReject('{{ $tran->id }}',1)"
+                                            <button
+                                                onclick="ConfirmTranOrReject('{{ $tran->id }}',1,'{{ $tran->user_id }}')"
                                                 type="button" class="btn btn-xs btn-danger btn-icon">
                                                 <i class="link-icon" data-feather="x"></i>
                                             </button>
@@ -137,7 +142,9 @@
     @endsection
     @section('js')
         <script>
-            function ConfirmTranOrReject(id, status) {
+            var socket = io.connect('https://cyprusvarosha.com');
+
+            function ConfirmTranOrReject(id, status, user_id) {
 
                 swal.fire({
                     title: 'Emin misiniz?',
@@ -167,6 +174,12 @@
                             url: url,
                             success: function(response) {
                                 console.log(response);
+                                let message = "";
+                                if (status == 0)
+                                    message = "Your purchase request has been approved.";
+                                else
+                                    message = "Your purchase request has been rejected.";
+
                                 if (response.status) {
                                     Swal.fire(
                                         'Basarili!',
@@ -174,6 +187,12 @@
                                         'success'
                                     ).then((result) => {
                                         if (result.isConfirmed) {
+
+                                            socket.emit('SEND_SPECIFIC_MESSAGE_BY_USER_ID', {
+                                                message: message,
+                                                id: user_id
+                                            });
+
                                             location.reload();
                                         }
                                     })

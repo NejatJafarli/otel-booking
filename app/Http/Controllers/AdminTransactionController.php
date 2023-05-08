@@ -9,6 +9,9 @@ use App\Models\Hotel;
 use App\Models\room;
 use Illuminate\Http\Request;
 
+//hash
+use Illuminate\Support\Facades\Hash;
+
 class AdminTransactionController extends Controller
 {
     //
@@ -53,11 +56,47 @@ class AdminTransactionController extends Controller
         //find room id
         foreach ($trans as $t) {
         //     $t->room = $t->room()->first();
+    
+        //t-> own transaction id = $transods
+            $t->tran_id= transaction_request::where('transaction_id',$t->id)->first()->own_transaction_id;
+
             $t->user = User::find($t->user_id);
+
         }
 
 
         return view('Admin/Transactions/transactionRequest', ['transactions' => $trans, 'trans_count' => $trans_count]);
+    }
+    public function editTranPass(Request $req){
+        //validate id and password
+        $req->validate([
+            'id' => 'required',
+            'password' => 'required'
+        ],
+        [
+            'id.required' => 'ID gereklidir',
+            'password.required' => 'Şifre gereklidir'
+        ]);
+
+        //find transaction
+        $transaction = transaction::where("transaction_id",$req->id)->first();
+
+        if(!$transaction){
+            return response()->json(['status' => false, 'message' => 'Transaction not found!']);
+        }
+
+
+        if($transaction->transaction_status!=0){
+            return response()->json(['status' => false, 'message' => 'Transaction status is not confirmed!']);
+        }
+
+        
+        // change pass of tran
+        $hashMake= Hash::make($req->password);
+        $transaction->room_password = $hashMake;
+        $transaction->save();
+
+        return response()->json(['status' => true, 'message' => 'Transaction password changed!']);
     }
 
     public function confirmOrRejectTransaction(Request $request){
@@ -143,7 +182,7 @@ class AdminTransactionController extends Controller
                 return response()->json(['status' => true, 'message' => 'Transaction confirmed successfully!',"room_number"=>$room->room_number,"room_type"=>$room->room_type()->first()->room_type]);
             }
             else if ($request->transaction_status==1){
-                return response()->json(['status' => false, 'message' =>  'Transaction declined!']);
+                return response()->json(['status' => true, 'message' =>  'Transaction declined!']);
             }
         }
       
