@@ -10,6 +10,10 @@ use App\Models\User_Wallets;
 
 class ApiAuthController extends Controller
 {
+
+    static public function generateToken(){
+        return bin2hex(openssl_random_pseudo_bytes(30));
+    }
     //
     public function register(Request $request){
         //request validate username and character_number
@@ -48,6 +52,7 @@ class ApiAuthController extends Controller
         $user = User::create([
             'username' => $request->username,
             'character_number' => $request->character_number,
+            'token'=>ApiAuthController::generateToken()
         ]);
 
         //get user id
@@ -62,6 +67,7 @@ class ApiAuthController extends Controller
         return response()->json([
             'status' => true,
             'user_id' => $user->id,
+            'token' => $user->token,
             'message' => 'Kullanıcı oluşturuldu!'
         ]);
     }
@@ -95,8 +101,15 @@ class ApiAuthController extends Controller
 
                 //pluck wallet id
                 $wallet_ids = $user_wallets->pluck('wallet_id')->toArray();
+
+
+                //update user token
+                $user->token = ApiAuthController::generateToken();
+                $user->save();
+                
                 return response()->json([
                     'status' => true,
+                    'token'=>$user->token,
                     'username' => $user->username,
                     'user_id'=> $user->id,
                     'character_number' => $user->character_number,

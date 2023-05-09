@@ -15,7 +15,8 @@ class room_types extends Model
         'room_type',
         "room_price",
         "hotel_id",
-        "discount_percent"
+        "discount_percent",
+        "sceneName"
     ];
     
     //relationship with hotel

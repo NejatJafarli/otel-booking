@@ -22,6 +22,7 @@ class CreateRoomsTable extends Migration
             $table->foreign('room_type_id')->references('id')->on('room_types');
             //if he accepts the reservation, the room status will be changed to 1 
             $table->string("transaction_id")->nullable();
+            $table->string("sceneName")->nullable();
             //if room status is 1, then the transaction id will be filled
             $table->timestamps();
         });

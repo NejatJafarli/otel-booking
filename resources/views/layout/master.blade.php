@@ -92,6 +92,12 @@ License: For each use you must have a valid license purchased only from above li
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('onlineChat') }}" class="nav-link">
+                            <i class="link-icon" data-feather="box"></i>
+                            <span class="link-title">onlineChat</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('hotels') }}" class="nav-link">
                             <i class="link-icon" data-feather="home"></i>
                             <span class="link-title">Oteller</span>

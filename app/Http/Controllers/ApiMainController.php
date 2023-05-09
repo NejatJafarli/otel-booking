@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\ApiAuthController;
 use App\Models\BuyOptions;
 use App\Models\room;
 use App\Models\Hotel;
@@ -126,10 +127,25 @@ class ApiMainController extends Controller
         return response()->json(['status' => true, 'user' => $user]);
     }
 
-    public function getRoomTypes()
+    public function getRoomTypes(Request $req)
     {
+        //hotel id validate
+        $req->validate([
+            'hotel_id' => 'required',
+        ],[
+            'hotel_id.required' => 'hotel id is required',
+        ]);
 
-        $room_types = room_types::all();
+
+        $hotel = Hotel::find($req->hotel_id);
+        if($hotel == null)
+            return response()->json(['status' => false, 'message' => 'hotel not found']);
+        
+
+        $room_types = room_types::where('hotel_id', $req->hotel_id)->get();
+
+        if($room_types == null)
+            return response()->json(['status' => false, 'message' => 'room types not found on this hotel']);
 
         //have a room
         foreach ($room_types as $room_type) {
@@ -142,7 +158,6 @@ class ApiMainController extends Controller
             unset($room_type->room_type);
             unset($room_type->id);
         }
-
         return response()->json(['status' => true, 'room_types' => $room_types]);
     }
 
@@ -179,9 +194,8 @@ class ApiMainController extends Controller
         
         //find buyOPtions by time type
         $buyOption = BuyOptions::where('option_name', $request->buyoptionname)->first();
-        if (!$buyOption) {
+        if (!$buyOption) 
             return response()->json(['status' => false, 'message' => 'Buy option not found!']);
-        }
         //check in date and check out date
 
         //get check in date datetime
@@ -190,31 +204,29 @@ class ApiMainController extends Controller
         //check if user exists
 
         $userid= User_Wallets::where('wallet_id', $request->wallet_id)->first();
-        if (!$userid) {
+        if (!$userid) 
             return response()->json(['status' => false, 'message' => 'User not found!']);
-        }
+
         $user = User::find($userid->user_id);
-        if (!$user) {
+
+        if (!$user) 
             return response()->json(['status' => false, 'message' => 'User not found!']);
-        }
         //check if room type exists
         $room_type = room_types::find($request->room_type_id);
-        if (!$room_type) {
+        if (!$room_type) 
             return response()->json(['status' => false, 'message' => 'Room type not found!']);
-        }
 
         //check available room
         $available_room = room::where('room_type_id', $room_type->id)->where('room_status', 0)->first();
-        if (!$available_room) {
+
+        if (!$available_room) 
             return response()->json(['status' => false, 'message' => 'There is no available room! for this room type']);
-        }
-        if ($check_in_date > $check_out_date) {
+            
+        if ($check_in_date > $check_out_date) 
             return response()->json(['status' => false, 'message' => 'Check in date must be less than check out date!']);
-        }
 
-        $oneDayPrice= $room_type->room_price;
+        $oneDayPrice= $room_type->room_price/7;
         $amount = $oneDayPrice * $buyOption->option_days;
-
 
 
         if($buyOption->discount_percent!=null){
@@ -303,6 +315,8 @@ class ApiMainController extends Controller
             'room_number' => 'required|integer',
             'password' => 'required|string',
             'user_id'=>'required',
+            'token'=>'required',
+            "hotel_id"=>"required"
         ],
         [
             'room_number.required' => 'Room number field cannot be left blank!',
@@ -310,36 +324,56 @@ class ApiMainController extends Controller
             'password.required' => 'Password field cannot be left blank!',
             'password.string' => 'Password can only consist of letters!',
             'user_id.required' => 'User password field cannot be left blank!',
+            'user_id.string' => 'User password can only consist of letters!',
+            "hotel_id"=>"Hotel id field cannot be left blank!",
         ]);
 
         //check if user exists4
         $user = User::find($req->user_id);
-        if(!$user){
+        if(!$user)
             return response()->json(['status' => false, 'message' => 'User not found!']);
-        }
+        
+
+        if($user->token!=$req->token)
+            return response()->json(['status' => false, 'message' => 'Token is not valid!']);
 
         // find room
-        $room = room::where('room_number',$req->room_number)->first();
-        if(!$room){
-            return response()->json(['status' => false, 'message' => 'Oda bulunamadı!']);
+        $room = room::where('room_number',$req->room_number)->get();
+        if(!$room)
+            return response()->json(['status' => false, 'message' => "Room not found!"]);
+        
+            //foreach
+        $found=null;
+        foreach($room as $r){
+            $r_type=$r->room_type()->first();
+            if($r_type){
+                if ($r_type->hotel_id==$req->hotel_id){
+                    $found=$r;
+                    break;
+                }
+            }
         }
+        $room=$found;
 
+        if(!$found)
+            return response()->json(['status' => false, 'message' => "Room not found!"]);
+        
         //check if room is occupied
-        if($room->room_status != 1){
+        if($room->room_status != 1)
             return response()->json(['status' => false, 'message' => 'This room is not occupied!']);
-        }
+        
 
         //get room transaction
         $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
 
         //check if transaction is confirmed
-        if($transaction->transaction_status != 0){
+        if($transaction->transaction_status != 0)
             return response()->json(['status' => false, 'message' => 'This transaction is not confirmed']);
-        }
+        
 
-        if($transaction->user_id != $user->id){
+        if($transaction->user_id != $user->id)
             return response()->json(['status' => false, 'message' => 'This transaction does not belong to this user!']);
-        }
+        
         
 
         $transaction->room_password = Hash::make($req->password);
@@ -354,20 +388,53 @@ class ApiMainController extends Controller
         $request->validate(
             [
                 'user_id' => 'required',
+                "hotel_id"=>"required"
             ],
             [
                 'user_id.required' => 'Wallet ID field cannot be left blank!',
+                "hotel_id.required"=>"Hotel ID field cannot be left blank!"
             ]
         );
+
+        $hotel=Hotel::find($request->hotel_id);
+        if(!$hotel){
+            return response()->json(['status' => false, 'message' => 'Hotel not found!']);
+        }
+
         //get user wallets by wallet id
         //get user by wallet id
         $user = User::find($request->user_id);
         if(!$user){
             return response()->json(['status' => false, 'message' => 'User not found!']);
         }
+        //get room types ids which hotel id is equal to hotel id
+        $room_types = room_types::where('hotel_id',$hotel->id)->get();
+        if(!$room_types){
+            return response()->json(['status' => false, 'message' => 'Room types not found!']);
+        }
+        $room_types_ids = [];
+        foreach($room_types as $room_type)
+            array_push($room_types_ids,$room_type->id);
         
+        //find all this typed rooms
+        $rooms = room::whereIn('room_type_id',$room_types_ids)->get();
+
+        if(!$rooms)
+            return response()->json(['status' => false, 'message' => 'Rooms not found!']);
+        
+        $rooms_ids = [];
+        foreach($rooms as $room)
+            array_push($rooms_ids,$room->id);
+        
+
         //get all user transactions check if transaction status is 0 and check in date and check out date between now
-        $transactions = transaction::where('user_id',$user->id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->get();
+        // $transactions = transaction::where('user_id',$user->id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->get();
+        //get all conditions and rooms_ids
+        $transactions = transaction::where('user_id',$user->id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->whereIn('room_id',$rooms_ids)->get();
+
+        //get all conditions and room_types_ids 
+        // $transactions = transaction::where('user_id',$user->id)->where("room_id","!=",null)->where('transaction_status',0)->where('check_out_date','>=',now())->whereIn('room_type_id',$room_types_ids)->get();
+        
         if(!$transactions){
             return response()->json(['status' => false, 'message' => 'No reservations found!']);
         }
@@ -386,27 +453,48 @@ class ApiMainController extends Controller
 
     public function enterRoom(Request $request){
         //room number and password
+        
         $request->validate(
             [
                 'room_number' => 'required|integer',
+                "hotel_id"=>"required",
+                "password"=>"required"
             ],
             [
-              
                 'room_number.required' => 'Room number field cannot be left blank!',
                 'room_number.integer' => 'Room number can only consist of numbers!',
+                "hotel_id.required"=>"Hotel ID field cannot be left blank!",
+                "password.required"=>"Password field cannot be left blank!"
             ]
         );
 
         // find room
-        $room = room::where('room_number',$request->room_number)->first();
-        if(!$room){
-            return response()->json(['status' => false, 'message' => "Room not found!"]);
+        $room = room::where('room_number',$request->room_number)->get();
+        if(!$room)
+        return response()->json(['status' => false, 'message' => "Room not found!"]);
+        
+            //foreach
+        $found = null;
+        foreach($room as $r){
+            $r_type=$r->room_type()->first();
+            if($r_type){
+                if ($r_type->hotel_id==$request->hotel_id){
+                    $found=$r;
+                    break;
+                }
+            }
         }
+        $room=$found;
+
+        if(!$found)
+            return response()->json(['status' => false, 'message' => "Room not found!"]);
+        // if(!$room->room_type()->first()->hotel_id!= $request->hotel_id)
+        //     return response()->json(['status' => false, 'message' => "this room does not belong to this hotel!"]);
 
         //check if room is occupied
-        if($room->room_status != 1){
+        if($room->room_status != 1)
             return response()->json(['status' => false, 'message' => "This room is not occupied!"]);
-        }
+        
 
         //get room transaction
         $transaction = transaction::where('transaction_id',$room->transaction_id)->first();
@@ -550,6 +638,7 @@ class ApiMainController extends Controller
             return response()->json(['status' => false, 'message' => 'Transaction status is not valid!']);
         }
     }
+
     public function getHotel($id){
         $hotel = Hotel::find($id);
         if(!$hotel){
@@ -622,6 +711,7 @@ class ApiMainController extends Controller
         }else
             return response()->json(['status' => false,"price"=>$hotel->price,"priceforday"=>$hotel->day_for_price,"payment"=>true, 'message' => 'You have not made a reservation for this hotel!']);
     }
+
     public function getConfig(Request $req){
         // get named config
         $config = myConfig::where('key',$req->get)->first();
@@ -630,6 +720,7 @@ class ApiMainController extends Controller
         else
             return response()->json(['status' => false, 'message' => 'Config Not Found']);
     }
+
     public function RegisterManuel(Request $req){
         //username password validation
         $req->validate(
@@ -671,12 +762,12 @@ class ApiMainController extends Controller
             'username' => $req->username,
             'password' => Hash::make($req->password),
             'character_number' => $req->char_number,
+            'token'=>ApiAuthController::generateToken()
         ]);
 
-        return response()->json(['status' => true, 'message' => 'User created!','user_id'=>$user->id]);
+        return response()->json(['status' => true,'token'=>$user->token, 'message' => 'User created!','user_id'=>$user->id]);
     }
-
-
+    
     public function LoginManuel(Request $req){
         //username password validation
         $req->validate(
@@ -709,77 +800,12 @@ class ApiMainController extends Controller
             $user_wallet_id=$wallet_ids[0];
         }
 
-        return response()->json(['status' => true, 'message' => 'User logged in!','user_id'=>$user->id,"wallet_id"=>$user_wallet_id, "wallet_ids"=>$wallet_ids,"character_number"=>$user->character_number]);
+        //update user token and return
+        $user->token=ApiAuthController::generateToken();
+        $user->save();
+
+        return response()->json(['status' => true,'token'=>$user->token,'message' => 'User logged in!','user_id'=>$user->id,"wallet_id"=>$user_wallet_id, "wallet_ids"=>$wallet_ids,"character_number"=>$user->character_number]);
     }
-
-    // public function setWalletId(Request $req){
-    //     //username valdiation
-    //     $req->validate(
-    //         [
-    //             'username' => 'required|string',
-    //             "password" => "required|string",
-    //             'wallet_id' => 'required|string',
-    //             'wallet_id_old' => 'required|string',
-    //         ],
-    //         [
-    //             'username.required' => 'Username cannot be empty!',
-    //             'username.string' => 'Username can only consist of letters!',
-    //             'wallet_id.required' => 'Wallet ID cannot be empty!',
-    //             'wallet_id.string' => 'Wallet ID can only consist of letters!',
-    //             'wallet_id_old.required' => 'Wallet ID cannot be empty!',
-    //             'wallet_id_old.string' => 'Wallet ID can only consist of letters!',
-    //         ]
-    //     );
-
-    //     //check if username is have
-    //     $currentUser = User::where('username',$req->username)->first();
-
-    //     if(!$currentUser)
-    //         return response()->json(['status' => false, 'message' => 'User not found!']);
-
-    //     //check password
-    //     if(!Hash::check($req->password,$currentUser->password))
-    //         return response()->json(['status' => false, 'message' => 'Password is wrong!']);
-
-    //     //check if wallet id is taken
-    //     $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id_old)->first();
-    //     //user wallet is not found
-    //     if(!$user_wallets)
-    //         return response()->json(['status' => false, 'message' => 'Wallet ID not found!']);
-
-    //     $userid = $user_wallets->user_id;
-
-    //          //check if wallet id is taken
-    //     $user_wallets = User_Wallets::where('wallet_id',$req->wallet_id)->first();
-
-    //     if(!$user_wallets){
-    //         //pluck wallet_id
-    //         $wallets = User_Wallets::where('user_id',$userid)->get()->pluck('wallet_id');
-
-    //         //check if wallet id is taken
-    //         if($wallets->contains($req->wallet_id))
-    //             return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
-    //         else{
-    //             //create new user wallet
-    //             $user_wallets = User_Wallets::create([
-    //                 'user_id' => $userid,
-    //                 'wallet_id' => $req->wallet_id,
-    //             ]);
-    //             return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
-    //         }
-            
-    //     }else
-    //         return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
-        
-
-    //     // if($user_wallets->wallet_id==$req->wallet_id)
-    //     //     return response()->json(['status' => true, 'message' => 'Wallet ID set!']);
-
-    //     // if($user_wallets)
-    //     //     return response()->json(['status' => false, 'message' => 'Wallet ID is taken!']);
-
-    // }
-
     //create TransactionRequest
     public function createTransactionRequest(Request $req){
         //transaction id validation
@@ -855,7 +881,6 @@ class ApiMainController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Wallet ID added!']);
     }
-
     //remove walllet id
     public function removeWalletId(Request $req){
 
@@ -892,4 +917,16 @@ class ApiMainController extends Controller
         return response()->json(['status' => true, 'message' => 'Wallet ID removed!']);
     }
 
+    public function getRoomTypeScene($id){
+        //find this room type
+        $room_type=room_types::find($id);
+
+        if(!$room_type)
+            return response()->json(['status' => false, 'message' => 'Room Type not found!']);
+            
+        if(!$room_type->sceneName)
+            return response()->json(['status' => false, 'message' => 'this room type is not have scene!']);
+            //find this room type scene
+        return response()->json(['status' => true,"sceneName"=>$room_type->sceneName, 'message' => 'Room Type not found!']);
+    }
 }

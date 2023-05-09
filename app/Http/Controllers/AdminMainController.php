@@ -42,4 +42,13 @@ class AdminMainController extends Controller
 
         return view('Admin/Main/chatLog',['content'=>$content]);
     }
+
+    public function onlineChat(){
+
+        //get all users
+        $users = \App\Models\User::all();
+        return view('Admin/Main/onlineChat',['users'=>$users]);
+
+    }
+
 }

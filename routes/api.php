@@ -26,12 +26,13 @@ Route::get('user/get/{id}', [ApiMainController::class, 'getUser']);
 //user rooms
 Route::get('user/rooms/{id}', [ApiMainController::class, 'getUserRooms']);
 //get room Types
-Route::get('/room_types', [ApiMainController::class, 'getRoomTypes']);
+Route::post('/room_types', [ApiMainController::class, 'getRoomTypes']);
 
 //get buy options
 Route::get('/buy_options/{type_id}', [ApiMainController::class, 'getBuyOptions']);
 
 Route::get('getHotel/{id}', [ApiMainController::class, 'getHotel']);
+Route::get('getRoomTypeScene/{id}', [ApiMainController::class, 'getRoomTypeScene']);
 
 Route::post('enterHotel', [ApiMainController::class, 'enterHotel']);
 // buy a room

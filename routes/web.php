@@ -125,6 +125,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'adminauth'], function () {
     //route prefix user
     Route::get('/chatLog', [AdminMainController::class, 'chatLog'])->name('chatLog');
     Route::get('/onlineUsers', [AdminMainController::class, 'onlineUsers'])->name('onlineUsers');
+    Route::get('/onlineChat', [AdminMainController::class, 'onlineChat'])->name('onlineChat');
     Route::group(['prefix' => 'users'], function () {
         Route::get('/{id}', [AdminUserController::class, 'userDetail'])->name('userDetail');
         Route::get('', [AdminUserController::class, 'users'])->name('users');

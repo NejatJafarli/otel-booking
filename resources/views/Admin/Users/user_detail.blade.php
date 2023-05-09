@@ -2,6 +2,31 @@
 
 @section('header')
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous">
+    </script>
+    <style>
+        .chat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: black;
+            border-radius: 10px;
+            max-width: 1200px;
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+    </style>
 @endsection
 @section('content')
     <div class="row flex-grow-1">
@@ -24,8 +49,8 @@
                             {{-- //update user button --}}
                             <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal2"
                                 class="btn btn-primary">Kullaniciyi Guncelle</button>
-
-
+                            <button onclick="GetAllChatsBtn()" type="button" class="btn btn-primary">Kullanicinin Mesaj Gecmisi
+                                Goruntule</button>
                         </div>
                         <div class="col-6 col-md-12 col-xl-7">
                             <div id="customersChart" class="mt-md-3 mt-xl-0"></div>
@@ -188,6 +213,30 @@
         </div>
     </div>
     </div>
+    <div class="modal fade" id="exampleModal5" tabindex="-1" aria-labelledby="exampleModalLabel5" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Adminler Olan Chat Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                {{-- action="{{ route('CreateRoom') }}" method="POST" --}}
+                <form>
+                    <div class="modal-body">
+                        @csrf
+                        <div class="mb-3">
+                            <div class="chat" id="MainChat">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
         function deleteUser(id) {
             //swal ile silme onayi
@@ -299,11 +348,86 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
+
     <script>
         // npm package: datatables.net-bs5
         // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
         // npm package: datatables.net-bs5
         // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
+        var socket = io.connect('https://cyprusvarosha.com');
+
+        socket.on("CHAT_CREATED", (chatid, messages) => {
+            console.log(chatid, messages);
+            //get elemeny by id MainChat
+            let MainChat = document.getElementById("MainChat");
+
+            //create div element
+
+            dates = messages.map(x => x.created_at);
+            messages = messages.map(x => x.message);
+
+
+
+            for (let i = 0; i < messages.length; i++) {
+
+                let div = document.createElement('div');
+                div.classList.add('message');
+                //convert timestamp to year month day hour minute
+                //<color=red>qwr:<color=white> eeee
+                //qwr: eeee
+                //convert it 
+                let message = messages[i].replace(/<color=red>/g, '');
+                message = message.replace(/<color=white>/g, '');
+                message = message.replace(/<color=yellow>/g, '');
+
+
+
+                let date = new Date(dates[i]);
+                // let message = [year-month-day hour:minute] messages[i]
+                "[" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date
+                    .getHours() + ":" + date.getMinutes() + "] " + message;
+                let day = date.getDate();
+                let month = date.getMonth();
+                let year = date.getFullYear();
+                let hours = date.getHours();
+                let minute = date.getMinutes();
+
+                if (day < 10) day = '0' + day;
+                if (month < 10) month = '0' + month;
+                if (hours < 10) hours = '0' + hour;
+                if (minute < 10) minute = '0' + minute;
+                div.innerText = "[" + day + "-" + month + "-" + date.getFullYear() + " " + hours + ":" + minute +
+                    "] " + message + "\n";
+
+
+                MainChat.appendChild(div);
+            }
+
+        })
+
+        socket.on("RECEIVE_ALL_CHATS", data => {
+            if (data.length <= 0) {
+                alert("Sohbet Geçmişi Bulunamadı");
+                return;
+            }
+            $('#exampleModal5').modal('show');
+            let chatid = data[0].id
+
+            socket.emit("GET_CHAT", {
+                chat_id: chatid
+            });
+
+        })
+
+        function GetAllChatsBtn() {
+            socket.emit("GET_ALL_CHATS", {
+                id_one: "{{ $user->id }}"
+            });
+        }
+
+
+
+
         $(function() {
             'use strict';
 

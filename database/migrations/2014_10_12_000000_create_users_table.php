@@ -21,6 +21,8 @@ class CreateUsersTable extends Migration
             $table->string('wallet_id')->nullable();
             //character number
             $table->integer('character_number')->default(0);
+            //string token
+            $table->string('token')->nullable();
 
             //add mysql json type
             
