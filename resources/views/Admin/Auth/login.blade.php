@@ -35,14 +35,25 @@
         <div class="container-login100" style="background-image: url('/assets/admin/images/bg-01.jpg');">
             <div class="wrap-login100 p-l-110 p-r-110 p-t-62 p-b-33">
                 @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
 
                 @if (session('error'))
                     <div class="alert alert-danger solid alert-dismissible fade show">
                         <h5>Hata</h5>
-                        <p class="mb-0">{{session('error')}}</p>
+                        <p class="mb-0">{{ session('error') }}</p>
                     </div>
                 @endif
+
+                {{-- redirect()->back()->with('error', '3D Model dosyası glb formatında olmalıdır!');  catch this erron show --}}
+
+
                 {{-- //get success message
                 @if (session('success'))
                     <div class="alert alert-success solid alert-dismissible fade show">
